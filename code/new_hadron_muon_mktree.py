@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Jan 24 16:30:37 2022
 
-@author: barwu
-"""
 from uproot import concatenate, exceptions, recreate
 import numpy as np
 from glob import glob
@@ -97,6 +93,7 @@ list_of_directories=["0mgsimple","0m","1.75m","2m","4m","5.75m","8m","9.75m","12
 #CAF_files="/storage/shared/wshi/CAFs/NDFHC_PRISM/29/FHC.1029585.CAF.root"
 #prism_CAF_files="/storage/shared/wshi/CAFs/NDCAF/2m/FHC.1018172.CAF.root"
 CAF_files="/storage/shared/barwu/10thTry/NDCAF/"+argv[1]+"/*.CAF.root"
+# CAF_files="/storage/shared/barwu/10thTry/NDCAF/"+argv[1]+"/FHC.1122999.CAF.root"
 #CAF_files="/storage/shared/barwu/FDdevectorized/FDGeoEff_62877585_99?.root" #FD
 allFiles=glob(CAF_files) #file #s range from 0-29
 #cpu processing is set up later in the script
@@ -194,11 +191,12 @@ def processFiles(f):
             #                      geoThrows["ThrowVtxZ"][int(i_event/N_EVENTS_PER_THROW)]-offset[2])
 
             NthrowsInFV = sum(throws_FV) # Count how many throws were in the FV. Will be useful later.
+            # Don't include throws inside the ND_FV
             if NthrowsInFV==0 and APPLY_FV_CUT:
-                effs[i_event]=-1.
-                effs_tracker[i_event]=-1.
-                effs_contained[i_event]=-1.
-                effs_combined[i_event]=-1.
+                # effs[i_event]=-1.
+                # effs_tracker[i_event]=-1.
+                # effs_contained[i_event]=-1.
+                # effs_combined[i_event]=-1.
                 continue
 
             # Loop through the hadronic geometric efficiency throw results. Each bitfield corresponds to 64 throws. There are 64*78 = 4992 throws in total
@@ -319,10 +317,6 @@ def processFiles(f):
                 effs_tracker[i_event] = float(thisEff_tracker)/(78.*64)
                 effs_contained[i_event] = float(thisEff_contained)/(78.*64)
                 effs_combined[i_event] = float(thisEff_combined)/(78.*64)
-                # effs[i_event] = thisEff/(78.*64) #FD
-                # effs_tracker[i_event] = float(thisEff_tracker)/(78.*64)
-                # effs_contained[i_event] = float(thisEff_contained)/(78.*64)
-                # effs_combined[i_event] = float(thisEff_combined)/(78.*64)
 
         # This used to be used for matplotlib, but I don't use that for histogram-making.
         fv = np.logical_and(CAF["inFV"], CAF["isCC"])
@@ -375,7 +369,8 @@ def processFiles(f):
         with recreate(output) as tree:
 
             #for var in ['LepMomX','LepMomY','LepMomZ','NuMomX','NuMomY','NuMomZ','vtx_x','vtx_y','vtx_z','isCC','Ev','LepE','LepNuAngle']: extend_dict[var]=CAF[var]
-            totmom=np.sqrt(np.power(CAF['LepMomX'],2)+np.power(CAF['LepMomY'],2)+np.power(CAF['LepMomZ'],2))
+            # totmom=np.sqrt(np.power(CAF['LepMomX'],2)+np.power(CAF['LepMomY'],2)+np.power(CAF['LepMomZ'],2)) // Don't use power,
+            totmom=np.sqrt(CAF['LepMomX']*CAF['LepMomX']+CAF['LepMomY']*CAF['LepMomY']+CAF['LepMomZ']*CAF['LepMomZ'])
             cosangle=np.cos(CAF['LepNuAngle'])
             #effs_selected=np.reciprocal(np.reciprocal(effs_contained)+np.reciprocal(effs_tracker))
 
