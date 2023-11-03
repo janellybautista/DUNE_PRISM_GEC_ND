@@ -5,9 +5,9 @@
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=Flynn.Y.Guo@stonybrook.edu
 #SBATCH --nodelist=birch # --nodes=4 --gres=gpu
-#SBATCH --time=72:00:00
+#SBATCH --time=180:00:00
 #!/bin/bash
 
 cd /home/fyguo/testbaroncode
-root ~/NeutrinoPhysics/GEC/BaronNewCode/code/histogram_files_ND.cpp
+root ~/home/fyguo/DUNE_PRISM_GEC_ND/code/histogram_files_ND.cpp
 wait
