@@ -421,7 +421,8 @@ def processFiles(f):
 if __name__ == "__main__" :
 
     net = muonEffModel()
-    net.load_state_dict(torch.load("/home/barwu/repos/MuonEffNN/8thTry/muonEff30.nn", map_location=torch.device('cpu')))
+    # net.load_state_dict(torch.load("/home/barwu/repos/MuonEffNN/8thTry/muonEff30.nn", map_location=torch.device('cpu')))
+    net.load_state_dict(torch.load("muonEff30.nn", map_location=torch.device('cpu')))
     net.eval()
 
     #if len(allFiles) < NUM_PROCS :
