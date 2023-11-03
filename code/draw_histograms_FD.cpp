@@ -133,7 +133,7 @@ void populate_histograms(char* eff,char* caf,vector<vector<TH1D*>>& hists1,vecto
           else if (k==2) var_type=numu_e;
           else if (k==3) var_type=e_vis_true;
 
-          // // for all parameter we used 
+          // // for all parameter we used
           // if (k==0) var_type=(*xyz_pos)[lar_pos][vtx_pos][k]; //I should implement a switch case block
           // else if (k<4) var_type=(*xyz_mom)[lar_pos][vtx_pos][k-1];
           // else if (k==4) var_type=sqrt(pow((*xyz_mom)[lar_pos][vtx_pos][0],2)+pow((*xyz_mom)[lar_pos][vtx_pos][1],2)+pow((*xyz_mom)[lar_pos][vtx_pos][2],2));
