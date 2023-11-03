@@ -29,9 +29,6 @@ const int NUM_LAR_DTR=3; // number of on/off axis position of LAr
 double LAr_position[NUM_LAR_DTR]={-2800.,-1400.,0.};
 double vertex_position[NUM_VTX]={-299.,-292.,-285.,-278.,-271.,-264.,-216.,-168.,-120.,-72.,-24.,24.,72.,120.,168.,216.,264.,271.,278.,285.,292.,299.};
 double total_detected[5][NUM_LAR_DTR][NUM_VTX]={};
-//float scale[30]={.19,.18,.18,.7,.7,1.05,.04,.034,.034,.07,.07,.07,.23,.21,.21,.73,.65,1.05,1.,1.,1.,1.05,1.05,1.05,.23,.2,.2,.7,.7,1.};
-float scale[45]={.17,.16,.16,.32,.33,1.,1.05,1.,1.,.52,.44,.44,1.05,.9,.88,.88,.88,.88,.7,.6,.6,1.05,.9,1.,1.05,1.,1.,.8,.75,.75,.85,1.05,1.05,1.05,1.05,1.05,
-                .55,.45,.45,.75,.9,.95,.9,1.,1.};
 
 struct Para
 {
@@ -129,6 +126,10 @@ void populate_histograms_FD(char* eff,char* caf,vector<vector<TH1D*>>& hists1,ve
 
           n++;
           if (vtx_pos==0||vtx_pos==1||vtx_pos==2||vtx_pos==4||vtx_pos==5||vtx_pos==16||vtx_pos==17||vtx_pos==19||vtx_pos==20||vtx_pos==21) continue;
+
+          // only pick center region: vtx_pos at -24cm and 24cm
+          if (vtx_pos != 10 && vtx_pos != 11) continue;
+          // cout << "vtx_pos: " << vtx_pos << endl;
 
           if (k==0) var_type=sqrt(pow((*xyz_mom)[lar_pos][vtx_pos][0],2)+pow((*xyz_mom)[lar_pos][vtx_pos][1],2)+pow((*xyz_mom)[lar_pos][vtx_pos][2],2));
           else if (k==1) var_type=cos(lepnuangle);
@@ -237,7 +238,6 @@ void NDaFD_RatioPlots(double geoeff_cut)
     // std::cout << "i: " << i << endl;
   }
 
-  n=4793;
   for (int j=0; j<n; j++)
   {
     memset(eff, 0, 9999); // clear array each time
@@ -284,10 +284,10 @@ void NDaFD_RatioPlots(double geoeff_cut)
     {
       const char *fd=item.field;
 
-      sprintf(sel_path,"/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/%0.3f_eff_veto_cut_ND_debug/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd);
+      sprintf(sel_path,"/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/%0.3f_eff_veto_cut_ND_debug_center/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd);
       sel_files[index]=new TFile(sel_path, "read");
       sel_histograms[index]=(TH1D*)sel_files[index]->Get(Form("selection-cut_%s_%s",dt,fd));
-      sprintf(geo_path,"/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/%0.3f_eff_veto_cut_ND_debug/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd);
+      sprintf(geo_path,"/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/%0.3f_eff_veto_cut_ND_debug_center/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd);
       geo_files[index]=new TFile(geo_path, "read");
       geo_histograms[index]=(TH1D*)geo_files[index]->Get(Form("geo-corrected_%s_%s",dt,fd));
       index++;
@@ -297,7 +297,7 @@ void NDaFD_RatioPlots(double geoeff_cut)
   for (Para item:pr)
   {
     const char *fd=item.field;
-    sprintf(raw_path,"/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/%0.3f_eff_veto_cut_ND_debug/%s/raw_%s.root",geoeff_cut,fd,fd);
+    sprintf(raw_path,"/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/%0.3f_eff_veto_cut_ND_debug_center/%s/raw_%s.root",geoeff_cut,fd,fd);
     raw_files[index_raw]=new TFile(raw_path, "read");
     raw_histograms[index_raw]=(TH1D*)raw_files[index_raw]->Get(Form("raw_%s",fd));
     index_raw++;
@@ -313,7 +313,7 @@ void NDaFD_RatioPlots(double geoeff_cut)
 
 
   // Create a folder before drawing plots
-  gSystem->mkdir(TString::Format("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/ratio_test_debug/%.3f_eff_veto_cut", geoeff_cut), kTRUE);
+  gSystem->mkdir(TString::Format("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/ratio_test_debug_center/%.3f_eff_veto_cut", geoeff_cut), kTRUE);
 
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
@@ -433,9 +433,9 @@ void NDaFD_RatioPlots(double geoeff_cut)
 
     }
     cs_ND[i_ND]->Update();
-    cs_ND[i_ND]->SaveAs(Form("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/ratio_test_debug/%0.3f_eff_veto_cut/ND_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins.png",geoeff_cut,dt,geoeff_cut));
+    cs_ND[i_ND]->SaveAs(Form("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/ratio_test_debug_center/%0.3f_eff_veto_cut/ND_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins.png",geoeff_cut,dt,geoeff_cut));
     rs_ND[i_ND]->Update();
-    rs_ND[i_ND]->SaveAs(Form("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/ratio_test_debug/%0.3f_eff_veto_cut/ND_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));;
+    rs_ND[i_ND]->SaveAs(Form("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/ratio_test_debug_center/%0.3f_eff_veto_cut/ND_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));;
 
     i_ND++;
   } // end ND plots;
@@ -531,8 +531,8 @@ void NDaFD_RatioPlots(double geoeff_cut)
     }
     cs[i-1]->Update();
     rs[i-1]->Update();
-    cs[i-1]->SaveAs(Form("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/ratio_test_debug/%0.3f_eff_veto_cut/FD_1760931_%s_less_edge_pos_%0.3f_eff_cut_hists.png", geoeff_cut,dt,geoeff_cut));
-    rs[i-1]->SaveAs(Form("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/ratio_test_debug/%0.3f_eff_veto_cut/FD_1760931_%s_less_edge_pos_%0.3f_eff_cut_hists_ratios.png", geoeff_cut,dt,geoeff_cut));
+    cs[i-1]->SaveAs(Form("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/ratio_test_debug_center/%0.3f_eff_veto_cut/FD_1760931_%s_less_edge_pos_%0.3f_eff_cut_hists.png", geoeff_cut,dt,geoeff_cut));
+    rs[i-1]->SaveAs(Form("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/ratio_test_debug_center/%0.3f_eff_veto_cut/FD_1760931_%s_less_edge_pos_%0.3f_eff_cut_hists_ratios.png", geoeff_cut,dt,geoeff_cut));
 
     i++;
   }// end br loop
@@ -688,7 +688,7 @@ void NDaFD_RatioPlots(double geoeff_cut)
     }// end para loop
 
     c_ratio[i_NDvFD]->Update();
-    c_ratio[i_NDvFD]->SaveAs(Form("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/ratio_test_debug/%0.3f_eff_veto_cut/NDvFD_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));
+    c_ratio[i_NDvFD]->SaveAs(Form("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/ratio_test_debug_center/%0.3f_eff_veto_cut/NDvFD_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));
 
 
     i_NDvFD++;
