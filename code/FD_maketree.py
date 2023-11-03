@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Jan 24 16:30:37 2022
 
-@author: barwu
-"""
 #from timeit import default_timer as time
 #start=time()
 from uproot import concatenate, exceptions
