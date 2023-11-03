@@ -1,8 +1,22 @@
 # DUNE_PRISM_GEC_ND
 DUNE-PRISM: GEC from muon side
+> Some are copied from: [FNAL instruction](https://github.com/FlynnYGUO/NeutrinoPhysics/blob/main/GEC/BaronCodeOutdated/NDGEC.md) and [NNhome instruction](https://github.com/FlynnYGUO/NeutrinoPhysics/blob/main/GEC/BaronNewCode/Instructions.md)
+## FNAL machine
+### 0. Setup
+#### 1. Log in:
+```
+kfnal                                      # Short for kinit -f <username>@FNAL.GOV. In my laptop, alias kfnal="/usr/bin/kinit flynnguo@FNAL.GOV" in ~/.zshrc
+ssh -X flynnguo@dunegpvm15.fnal.gov
+exit                                       # Quit FNAL
+```
+#### 2. DUNE FNAL machines (dunegpvm*) environment setup
+```
+cd /dune/app/users/flynnguo                                             # Replace with your username for all commands below
+```
+
 
 ## NNhome machine
-### Setup
+### 0. Setup
 #### 1. Log in:
 ```
 ssh -X fyguo@nnhome.physics.sunysb.edu       # Log my ivy account: <username>@ivy.physics.sunysb.edu
