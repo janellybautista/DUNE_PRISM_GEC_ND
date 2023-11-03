@@ -10,5 +10,5 @@
 #!/bin/bash
 
 cd /home/fyguo/testbaroncode
-python3 ~/NeutrinoPhysics/GEC/BaronNewCode/code/FD_maketree.py
+python3 ~/home/fyguo/DUNE_PRISM_GEC_ND/code/FD_maketree.py
 wait
