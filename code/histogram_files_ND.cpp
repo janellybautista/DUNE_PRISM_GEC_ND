@@ -95,7 +95,7 @@ void histogram_files_ND(double geoeff_cut)
   }
 
   // Find the directory of CAF file
-  const char* inDir = "/home/fyguo/testbaroncode/0mgsimple/110";
+  const char* inDir = "/home/fyguo/testbaroncode/0mgsimple/104";
 
   char* dir = gSystem->ExpandPathName(inDir);
   void* dirp = gSystem->OpenDirectory(dir);
@@ -177,6 +177,7 @@ void histogram_files_ND(double geoeff_cut)
     Double_t LepE = 0., eP = 0., ePip = 0., ePim = 0., ePi0 = 0., eOther = 0.;
     int nipi0 = 0;
 
+
     caf_tree->SetBranchAddress("isCC",&isCC);
     event_data->SetBranchAddress("inFV",&inFV);
     caf_tree->SetBranchAddress("LepE", &LepE);
@@ -186,6 +187,7 @@ void histogram_files_ND(double geoeff_cut)
     caf_tree->SetBranchAddress("ePi0", &ePi0);
     caf_tree->SetBranchAddress("eOther", &eOther);
     caf_tree->SetBranchAddress("nipi0", &nipi0);
+    caf_tree->SetBranchAddress("vtx_x", &x_pos);
 
     double pi0_mass = 0.134977; // GeV
 
@@ -218,6 +220,9 @@ void histogram_files_ND(double geoeff_cut)
       caf_tree->GetEntry(i);
       event_data->GetEntry(i);
 
+      // only pick center region
+      if (x_pos <= -50 || x_pos >= 50) continue;  // Skip values outside the (-50, 50) range
+      // cout << "x_pos: " << x_pos << endl;
       //
       E_vis_true = LepE + eP + ePip + ePim + ePi0 + eOther + nipi0 * pi0_mass;
 
@@ -277,19 +282,19 @@ void histogram_files_ND(double geoeff_cut)
       const char *fd=item.field;
 
       // Create a folder before writting root file
-      gSystem->mkdir(TString::Format("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/%.3f_eff_veto_cut_ND_debug/%s", geoeff_cut,fd), kTRUE); // _debug means only choose events w/ geoeff >=0
+      gSystem->mkdir(TString::Format("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/%.3f_eff_veto_cut_ND_debug_center/%s", geoeff_cut,fd), kTRUE); // _debug means only choose events w/ geoeff >=0
 
       if (index<NUM_FIELDS) {
-        raw_files[index]=new TFile(Form("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/%.3f_eff_veto_cut_ND_debug/%s/raw_%s.root",geoeff_cut, fd,fd),"update");
+        raw_files[index]=new TFile(Form("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/%.3f_eff_veto_cut_ND_debug_center/%s/raw_%s.root",geoeff_cut, fd,fd),"update");
         TH1D* raw_hist=histograms1.at(index);
         raw_hist->Write();
         raw_files[index]->Close();
       }
-      sel_files[index]=new TFile(Form("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/%.3f_eff_veto_cut_ND_debug/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd),"update");
+      sel_files[index]=new TFile(Form("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/%.3f_eff_veto_cut_ND_debug_center/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd),"update");
       TH1D* sel_hist=histograms2.at(index);
       sel_hist->Write();
       sel_files[index]->Close();
-      geo_files[index]=new TFile(Form("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/%.3f_eff_veto_cut_ND_debug/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd),"update");
+      geo_files[index]=new TFile(Form("/home/fyguo/testbaroncode/hist_file/0mgsimple_histograms/%.3f_eff_veto_cut_ND_debug_center/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd),"update");
       TH1D* geo_hist=histograms3.at(index);
       geo_hist->Write();
       geo_files[index]->Close();
