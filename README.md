@@ -10,8 +10,17 @@ ssh -X flynnguo@dunegpvm15.fnal.gov
 exit                                       # Quit FNAL
 ```
 #### 2. DUNE FNAL machines (dunegpvm*) environment setup
+Only do it once:
 ```
 cd /dune/app/users/flynnguo                                             # Replace with your username for all commands below
+git clone https://github.com/FlynnYGUO/DUNE_PRISM_GEC_ND.git
+# This allows using pip
+source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+setup dunetpc v09_41_00_02 -q e20:prof
+pip install --target=/dune/app/users/flynnguo/lib/python3.9/site-packages uproot4
+pip install --target=/dune/app/users/flynnguo/lib/python3.9/site-packages uproot3
+pip install --target=/dune/app/users/flynnguo/lib/python3.9/site-packages torch
+pip install --target=/dune/app/users/flynnguo/lib/python3.9/site-packages scipy
 ```
 
 
