@@ -90,11 +90,8 @@ list_of_directories=["0mgsimple","0m","1.75m","2m","4m","5.75m","8m","9.75m","12
 #allFiles+=glob(CAF_RHC_fName)
 #CAF_files="/storage/shared/wshi/CAFs/NDFHC_PRISM/"+argv[1]+argv[2]+"/FHC.10"+argv[1]+argv[2]+"*.CAF.root"
 #CAF_files="/storage/shared/wshi/CAFs/NDFHC_PRISM/2[0,1,2]/FHC.102[0,1,2]*.CAF.root"
-#CAF_files="/storage/shared/wshi/CAFs/NDFHC_PRISM/29/FHC.1029585.CAF.root"
-#prism_CAF_files="/storage/shared/wshi/CAFs/NDCAF/2m/FHC.1018172.CAF.root"
-CAF_files="/storage/shared/barwu/10thTry/NDCAF/"+argv[1]+"/*.CAF.root"
-# CAF_files="/storage/shared/barwu/10thTry/NDCAF/"+argv[1]+"/FHC.1122999.CAF.root"
-#CAF_files="/storage/shared/barwu/FDdevectorized/FDGeoEff_62877585_99?.root" #FD
+# CAF_files="/storage/shared/barwu/10thTry/NDCAF/"+argv[1]+"/*.CAF.root"
+CAF_files=argv[1]
 allFiles=glob(CAF_files) #file #s range from 0-29
 #cpu processing is set up later in the script
 
@@ -128,13 +125,14 @@ def processFiles(f):
     #f is only 1 file, each file get assigned to a different cpu
     #for f in f_list :
         print(f)
-        output="/home/fyguo/testbaroncode/"+argv[1]+"/"+splitext(basename(f))[0]+"_Eff.root"
+        # output="/home/fyguo/testbaroncode/"+argv[1]+"/"+splitext(basename(f))[0]+"_Eff.root"
+        output= "/dune/app/users/flynnguo/DUNE_PRISM_GEC_ND/code/DUNE_PRISM_GEC_ND_Eff.root"
         #output="/home/barwu/repos/MuonEffNN/10thtry/placeholder/"+splitext(basename(f))[0]+"_MuonEff.root" #FD
-        if exists(output)==True:
-            #print("testing")
-            return None
-        try: makedirs("/home/fyguo/testbaroncode/"+argv[1])
-        except(FileExistsError): pass
+        # if exists(output)==True:
+        #     #print("testing")
+        #     return None
+        # try: makedirs("/home/fyguo/testbaroncode/"+argv[1])
+        # except(FileExistsError): pass
         try:
             # Get caf TTree
             CAF = concatenate("{0}:caf".format(f), treeVarsToRead, library = "np")
@@ -422,7 +420,7 @@ if __name__ == "__main__" :
 
     net = muonEffModel()
     # net.load_state_dict(torch.load("/home/barwu/repos/MuonEffNN/8thTry/muonEff30.nn", map_location=torch.device('cpu')))
-    net.load_state_dict(torch.load("muonEff30.nn", map_location=torch.device('cpu')))
+    net.load_state_dict(torch.load("/dune/app/users/flynnguo/DUNE_PRISM_GEC_ND/code/muonEff30.nn", map_location=torch.device('cpu')))
     net.eval()
 
     #if len(allFiles) < NUM_PROCS :
@@ -432,6 +430,7 @@ if __name__ == "__main__" :
     #print(filesPerProc, NUM_PROCS)
 
     print("looking at subdirectory ",end=argv[1])
+    print("\n")
     pool=Pool(NUM_PROCS) #don't use multiprocessing for debugging
     pool.map(processFiles, allFiles)
     #for file in allFiles: processFiles(file)
