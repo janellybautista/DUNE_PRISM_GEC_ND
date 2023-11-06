@@ -27,7 +27,7 @@ Next time once you log in to the FNAL machine, do the following (do it every tim
 cd /dune/app/users/flynnguo 
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 setup dunetpc v09_41_00_02 -q e20:prof
-export PYTHONPATH=/dune/app/users/weishi/lib/python3.9/site-packages:$PYTHONPATH
+export PYTHONPATH=/dune/app/users/flynnguo/lib/python3.9/site-packages:$PYTHONPATH
 ```
 
 ## NNhome machine
