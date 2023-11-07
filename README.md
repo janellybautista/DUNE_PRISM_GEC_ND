@@ -22,7 +22,8 @@ pip install --target=/dune/app/users/flynnguo/lib/python3.9/site-packages scipy
 ```
 Next time once you log in to the FNAL machine, do the following (do it every time you log in):
 ```
-cd /dune/app/users/flynnguo 
+cd /dune/app/users/flynnguo
+# This allows using pip
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 setup dunetpc v09_41_00_02 -q e20:prof
 export PYTHONPATH=/dune/app/users/flynnguo/lib/python3.9/site-packages:$PYTHONPATH
@@ -34,23 +35,8 @@ Output files from grid jobs are written to the scratch area ```/pnfs/dune/scratc
 Please avoid reading from, copying from, or writing massive amount of files directly to the pnfs area ```/pnfs/dune/persistent```, this will slow down the file system. Refer to [this wiki](https://mu2ewiki.fnal.gov/wiki/DataTransfer) for good practices on data transfer.
 
 #### 2. Interactive run
-
 If you want to run code interactively on ```dunegpvm*``` for debugging, follow instruction in this section.
-
-If you want to submit job from ```dunegpvm*```, go to the next section[Submit a job](#submit-a-job):
 ```
-# This allows using pip (and do it every time you login)
-source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
-setup dunetpc v09_41_00_02 -q e20:prof
-
-# Only do this once, specify python dependencies install dir (otherwise it defaults to ~/.local/lib/python3.9/site-packages/, not enough quota)
-pip install --target=/dune/app/users/flynnguo/lib/python3.9/site-packages uproot4
-pip install --target=/dune/app/users/flynnguo/lib/python3.9/site-packages uproot3
-pip install --target=/dune/app/users/flynnguo/lib/python3.9/site-packages torch
-pip install --target=/dune/app/users/flynnguo/lib/python3.9/site-packages scipy
-
-# Do this every time login
-export PYTHONPATH=/dune/app/users/flynnguo/lib/python3.9/site-packages:$PYTHONPATH
 python3 new_hadron_muon_mktree.py /pnfs/dune/persistent/physicsgroups/dunelbl/abooth/PRISM/Production/Simulation/ND_CAFMaker/v7/CAF/0mgsimple/101/FHC.1101999.CAF.root
 ```
 
