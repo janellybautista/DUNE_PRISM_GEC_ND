@@ -3,22 +3,20 @@ DUNE-PRISM: GEC from muon side
 > Some are copied from: [FNAL instruction](https://github.com/FlynnYGUO/NeutrinoPhysics/blob/main/GEC/BaronCodeOutdated/NDGEC.md) and [NNhome instruction](https://github.com/FlynnYGUO/NeutrinoPhysics/blob/main/GEC/BaronNewCode/Instructions.md)
 ## FNAL machine
 ### 0. Setup
-#### 1. Log in:
+#### 1. Log in & DUNE FNAL machines (dunegpvm*) environment setup:
 ```
 kfnal                                      # Short for kinit -f <username>@FNAL.GOV. In my laptop, alias kfnal="/usr/bin/kinit flynnguo@FNAL.GOV" in ~/.zshrc
 ssh -X flynnguo@dunegpvm15.fnal.gov
 exit                                       # Quit FNAL
 ```
-#### 2. DUNE FNAL machines (dunegpvm*) environment setup
-Only do it once:
+Environment setup (only do it once):
 ```
 cd /dune/app/users/flynnguo                                             # Replace with your username for all commands below
 git clone https://github.com/FlynnYGUO/DUNE_PRISM_GEC_ND.git
 # This allows using pip
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 setup dunetpc v09_41_00_02 -q e20:prof
-pip install --target=/dune/app/users/flynnguo/lib/python3.9/site-packages uproot4
-pip install --target=/dune/app/users/flynnguo/lib/python3.9/site-packages uproot3
+pip install --target=/dune/app/users/flynnguo/lib/python3.9/site-packages uproot
 pip install --target=/dune/app/users/flynnguo/lib/python3.9/site-packages torch
 pip install --target=/dune/app/users/flynnguo/lib/python3.9/site-packages scipy
 ```
@@ -28,6 +26,32 @@ cd /dune/app/users/flynnguo
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 setup dunetpc v09_41_00_02 -q e20:prof
 export PYTHONPATH=/dune/app/users/flynnguo/lib/python3.9/site-packages:$PYTHONPATH
+```
+Files I/O on DUNE machines
+Input ND CAF files are here: ```/pnfs/dune/persistent/physicsgroups/dunelbl/abooth/PRISM/Production/Simulation/ND_CAFMaker/v7/CAF```
+Output files from grid jobs are written to the scratch area ```/pnfs/dune/scratch/users/<your username>```.
+
+Please avoid reading from, copying from, or writing massive amount of files directly to the pnfs area ```/pnfs/dune/persistent```, this will slow down the file system. Refer to [this wiki](https://mu2ewiki.fnal.gov/wiki/DataTransfer) for good practices on data transfer.
+
+#### 2. Interactive run
+
+If you want to run code interactively on ```dunegpvm*``` for debugging, follow instruction in this section.
+
+If you want to submit job from ```dunegpvm*```, go to the next section[Submit a job](#submit-a-job):
+```
+# This allows using pip (and do it every time you login)
+source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+setup dunetpc v09_41_00_02 -q e20:prof
+
+# Only do this once, specify python dependencies install dir (otherwise it defaults to ~/.local/lib/python3.9/site-packages/, not enough quota)
+pip install --target=/dune/app/users/flynnguo/lib/python3.9/site-packages uproot4
+pip install --target=/dune/app/users/flynnguo/lib/python3.9/site-packages uproot3
+pip install --target=/dune/app/users/flynnguo/lib/python3.9/site-packages torch
+pip install --target=/dune/app/users/flynnguo/lib/python3.9/site-packages scipy
+
+# Do this every time login
+export PYTHONPATH=/dune/app/users/flynnguo/lib/python3.9/site-packages:$PYTHONPATH
+python3 new_hadron_muon_mktree.py /pnfs/dune/persistent/physicsgroups/dunelbl/abooth/PRISM/Production/Simulation/ND_CAFMaker/v7/CAF/0mgsimple/101/FHC.1101999.CAF.root
 ```
 
 ## NNhome machine
