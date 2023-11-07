@@ -40,6 +40,31 @@ If you want to run code interactively on ```dunegpvm*``` for debugging, follow i
 python3 new_hadron_muon_mktree.py /pnfs/dune/persistent/physicsgroups/dunelbl/abooth/PRISM/Production/Simulation/ND_CAFMaker/v7/CAF/0mgsimple/101/FHC.1101999.CAF.root
 ```
 
+#### 3. Submit grid job 
+```
+# Make a tarball to send everything you need to run your program on grid node
+
+tar -czvf work.tar.gz setup_NDcombEff.sh NDCAFs.txt new_hadron_muon_mktree.py muonEff30.nn muonEffModel.py
+
+# The following long command submits your job:
+# -N 2 means 2 jobs, this is now set as running 1 file per job as I have two files in txt file.
+# If you have X files in your text file, set: -N X
+
+jobsub_submit -G dune -N 2 --memory=1GB --disk=6GB --expected-lifetime=30m --cpu=1 --resource-provides=usage_model=DEDICATED,OPPORTUNISTIC,OFFSITE --tar_file_name=dropbox:///dune/app/users/flynnguo/DUNE_PRISM_GEC_ND/code/work.tar.gz --use-cvmfs-dropbox -l '+SingularityImage=\"/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-wn-sl7:latest\"' --append_condor_requirements='(TARGET.HAS_Singularity==true&&TARGET.HAS_CVMFS_dune_opensciencegrid_org==true&&TARGET.HAS_CVMFS_larsoft_opensciencegrid_org==true&&TARGET.CVMFS_dune_opensciencegrid_org_REVISION>=1105&&TARGET.HAS_CVMFS_fifeuser1_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser2_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser3_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser4_opensciencegrid_org==true)' file:///dune/app/users/flynnguo/DUNE_PRISM_GEC_ND/code/run_NDcombEff.sh
+```
+
+To query the job status: ```jobsub_q <usrname> -G dune```
+To remove a job status: ```condor_rm <usrname> -G dune```
+
+If your job gets held (HoldReasonCode 26), subcode 1 is memory, 2 is disk, 4 is too many starts (max of 10 attempts to run a job), 8 is run time. You can can also get HoldReasonCode 34 and subcode 0, which is also memory.
+
+The job script (```run_NDcombEff.sh```) can be adjusted to run more than one file per job, if desired, contact me. The magic happens at these lines:
+```
+(( LINE_N = ${PROCESS} + 1 ))
+
+for ifile in $(cat ${INPUT_TAR_DIR_LOCAL}/NDCAFs.txt | head -${LINE_N} | tail -1); do
+```
+
 ## NNhome machine
 ### 0. Setup
 #### 1. Log in:
