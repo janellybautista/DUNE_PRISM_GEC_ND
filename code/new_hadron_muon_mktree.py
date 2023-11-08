@@ -5,12 +5,16 @@ from uproot import concatenate, exceptions, recreate
 import numpy as np
 from glob import glob
 from sys import argv
+import sys
+
 import torch
 from muonEffModel import muonEffModel
 from os import makedirs
 from os.path import splitext, basename, exists
 from scipy.spatial.transform import Rotation as R
 from scipy.interpolate import interp1d
+
+
 #import math
 #from ROOT import TGraph
 from array import array
@@ -18,7 +22,7 @@ from array import array
 from multiprocessing import Pool
 
 # SET NUMBER OF PROCESSORS HERE
-NUM_PROCS = 50
+# NUM_PROCS = 50
 # ND coordinate offset.
 offset = [ 0., 5.5, 411. ]
 # Whether or not to apply FV cut to throws. Should be set to true.
@@ -91,8 +95,8 @@ list_of_directories=["0mgsimple","0m","1.75m","2m","4m","5.75m","8m","9.75m","12
 #CAF_files="/storage/shared/wshi/CAFs/NDFHC_PRISM/"+argv[1]+argv[2]+"/FHC.10"+argv[1]+argv[2]+"*.CAF.root"
 #CAF_files="/storage/shared/wshi/CAFs/NDFHC_PRISM/2[0,1,2]/FHC.102[0,1,2]*.CAF.root"
 # CAF_files="/storage/shared/barwu/10thTry/NDCAF/"+argv[1]+"/*.CAF.root"
-CAF_files=argv[1]
-allFiles=glob(CAF_files) #file #s range from 0-29
+CAF_files = str(sys.argv[1])
+# allFiles=glob(CAF_files) #file #s range from 0-29
 #cpu processing is set up later in the script
 
 """
@@ -124,13 +128,11 @@ def processFiles(f):
     # Analyse one file at a time, otherwise memory explodes!
     #f is only 1 file, each file get assigned to a different cpu
     #for f in f_list :
-        print(f)
         # output="/home/fyguo/testbaroncode/"+argv[1]+"/"+splitext(basename(f))[0]+"_Eff.root"
-        output= "/dune/app/users/flynnguo/DUNE_PRISM_GEC_ND/code/DUNE_PRISM_GEC_ND_Eff.root"
-        #output="/home/barwu/repos/MuonEffNN/10thtry/placeholder/"+splitext(basename(f))[0]+"_MuonEff.root" #FD
-        # if exists(output)==True:
-        #     #print("testing")
-        #     return None
+        output="./"+splitext(basename(f))[0]+"_Eff.root"
+        if exists(output)==True:
+            #print("testing")
+            return None
         # try: makedirs("/home/fyguo/testbaroncode/"+argv[1])
         # except(FileExistsError): pass
         try:
@@ -144,6 +146,7 @@ def processFiles(f):
             print("Couldn't find CAF TTree in file {0}. Skipping.".format(f))
             return None
             #continue
+        print(f)
 
         # Figure out what events pass the fiducial volume cut
         if APPLY_FV_CUT: CAF["inFV"] = isFV_vec(CAF["vtx_x"], CAF["vtx_y"], CAF["vtx_z"])
@@ -420,7 +423,7 @@ if __name__ == "__main__" :
 
     net = muonEffModel()
     # net.load_state_dict(torch.load("/home/barwu/repos/MuonEffNN/8thTry/muonEff30.nn", map_location=torch.device('cpu')))
-    net.load_state_dict(torch.load("/dune/app/users/flynnguo/DUNE_PRISM_GEC_ND/code/muonEff30.nn", map_location=torch.device('cpu')))
+    net.load_state_dict(torch.load("./muonEff30.nn", map_location=torch.device('cpu')))
     net.eval()
 
     #if len(allFiles) < NUM_PROCS :
@@ -429,10 +432,10 @@ if __name__ == "__main__" :
     #filesPerProc = int(np.ceil(float(len(allFiles))/NUM_PROCS))
     #print(filesPerProc, NUM_PROCS)
 
-    print("looking at subdirectory ",end=argv[1])
-    print("\n")
-    pool=Pool(NUM_PROCS) #don't use multiprocessing for debugging
-    pool.map(processFiles, allFiles)
+    # print("looking at subdirectory ",end=argv[1])
+    # print("\n")
+    # pool=Pool(NUM_PROCS) #don't use multiprocessing for debugging
+    # pool.map(processFiles, allFiles)
     #for file in allFiles: processFiles(file)
-    #processFiles("/storage/shared/cvilela/CAF/ND_v7/00/FHC.1000999.CAF.root")
+    processFiles(CAF_files)
     #processFiles("/storage/shared/wshi/CAFs/NDFHC_PRISM/03/FHC.1003999.CAF.root")
