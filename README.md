@@ -43,7 +43,7 @@ python3 new_hadron_muon_mktree.py /pnfs/dune/persistent/physicsgroups/dunelbl/ab
 ```
 # Make a tarball to send everything you need to run your program on grid node
 cd DUNE_PRISM_GEC_ND/code
-tar -czvf work.tar.gz setup_NDcombEff.sh NDCAFs.txt new_hadron_muon_mktree.py muonEff30.nn muonEffModel.py /dune/app/users/flynnguo/lib/python3.9/site-packages/uproot /dune/app/users/flynnguo/lib/python3.9/site-packages/torch /dune/app/users/flynnguo/lib/python3.9/site-packages/scipy 
+tar -czvf work.tar.gz setup_NDcombEff.sh NDCAFs.txt new_hadron_muon_mktree.py muonEff30.nn muonEffModel.py  
 
 # The following long command submits your job:
 # -N 2 means 2 jobs, this is now set as running 1 file per job as I have two files in txt file.
