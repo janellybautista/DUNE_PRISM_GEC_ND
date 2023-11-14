@@ -105,9 +105,7 @@ The batch job should generate 1000 efficiency files. These files contain the eff
 
 To convert all the efficiency files into a set of histograms, run:
 ```
-root -l -b
-.L /home/fyguo/DUNE_PRISM_GEC_ND/code/histogram_files_ND.cpp
-histogram_files_ND(<geoeff_cut>) #For example: histogram_files_ND(0.1) means 10% geoeff_cut
+root -l -b /home/fyguo/DUNE_PRISM_GEC_ND/code/histogram_files_ND.cpp
 ```
 They have been organized depending on what parameter is being plotted, for example, neutrino energy or position. In each group, it contains graphs for raw, selection-cut and
 geometrically-corrected distributions.
