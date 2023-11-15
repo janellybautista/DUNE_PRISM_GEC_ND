@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from uproot import concatenate, exceptions, recreate
+# from uproot import concatenate, exceptions, recreate
+from uproot4 import concatenate, exceptions
+from uproot3 import recreate, newtree
 import numpy as np
 from glob import glob
 from sys import argv
@@ -375,7 +377,51 @@ def processFiles(f):
             cosangle=np.cos(CAF['LepNuAngle'])
             #effs_selected=np.reciprocal(np.reciprocal(effs_contained)+np.reciprocal(effs_tracker))
 
-            event_data=tree.mktree("event_data",{#'NuMomX':np.float64,
+            # event_data=tree.mktree("event_data",{#'NuMomX':np.float64,
+            #                                      #'NuMomY':np.float64,
+            #                                      #'NuMomZ':np.float64,
+            #                                      'isCC':np.int32,
+            #                                      'inFV':np.int32,
+            #                                      #'Ev':np.int32,
+            #                                      #'LepE':np.float64,
+            #                                      #'LepNuAngle':np.float64,
+            #                                      'cos_LepNuAngle':np.float64,
+            #                                      'TotMom':np.float64,
+            #                                      'LongMom':np.float64,
+            #                                      'muon_contained_eff':np.float64,
+            #                                      'muon_tracker_eff':np.float64,
+            #                                      #'muon_selected_eff':np.float64,
+            #                                      'hadron_selected_eff':np.float64,
+            #                                      'combined_eff':np.float64,
+            #                                      'hadron_selected':np.int32,
+            #                                      'muon_contained':np.int32,
+            #                                      'muon_tracker':np.int32,
+            #                                      'muon_selected':np.int32,
+            #                                      'combined':np.int32})
+            #
+            # event_data.extend({#'NuMomX':CAF['NuMomX'],
+            #                    #'NuMomY':CAF['NuMomY'],
+            #                    #'NuMomZ':CAF['NuMomZ'],
+            #                    'isCC':CAF['isCC'],
+            #                    'inFV':CAF['inFV'],
+            #                    #'Ev':CAF['LepE'],
+            #                    #'LepE':CAF['LepE'],
+            #                    #'LepNuAngle':CAF['LepNuAngle'],
+            #                    'cos_LepNuAngle':cosangle,
+            #                    'TotMom':totmom,
+            #                    'LongMom':np.multiply(totmom,cosangle),
+            #                    'muon_contained_eff':effs_contained,
+            #                    'muon_tracker_eff':effs_tracker,
+            #                    #'muon_selected_eff':effs_selected,
+            #                    'hadron_selected_eff':effs,
+            #                    'combined_eff':effs_combined,
+            #                    'hadron_selected':sel,
+            #                    'muon_contained':sel_contained,
+            #                    'muon_tracker':sel_tracker,
+            #                    'muon_selected':np.add(sel_contained,sel_tracker),
+            #                    'combined':sel_combined})
+
+            event_data=tree.newtree("event_data",{#'NuMomX':np.float64,
                                                  #'NuMomY':np.float64,
                                                  #'NuMomZ':np.float64,
                                                  'isCC':np.int32,
@@ -397,27 +443,27 @@ def processFiles(f):
                                                  'muon_selected':np.int32,
                                                  'combined':np.int32})
 
-            event_data.extend({#'NuMomX':CAF['NuMomX'],
-                               #'NuMomY':CAF['NuMomY'],
-                               #'NuMomZ':CAF['NuMomZ'],
-                               'isCC':CAF['isCC'],
-                               'inFV':CAF['inFV'],
-                               #'Ev':CAF['LepE'],
-                               #'LepE':CAF['LepE'],
-                               #'LepNuAngle':CAF['LepNuAngle'],
-                               'cos_LepNuAngle':cosangle,
-                               'TotMom':totmom,
-                               'LongMom':np.multiply(totmom,cosangle),
-                               'muon_contained_eff':effs_contained,
-                               'muon_tracker_eff':effs_tracker,
-                               #'muon_selected_eff':effs_selected,
-                               'hadron_selected_eff':effs,
-                               'combined_eff':effs_combined,
-                               'hadron_selected':sel,
-                               'muon_contained':sel_contained,
-                               'muon_tracker':sel_tracker,
-                               'muon_selected':np.add(sel_contained,sel_tracker),
-                               'combined':sel_combined})
+            extend_dict={}
+            #for var in ['LepMomX','LepMomY','LepMomZ','NuMomX','NuMomY','NuMomZ','vtx_x','vtx_y','vtx_z','isCC','Ev','LepE','LepNuAngle']: extend_dict[var]=CAF[var]
+
+            extend_dict['inFV']=CAF['inFV']
+            extend_dict['isCC']=CAF['isCC']
+            extend_dict['hadron_selected_eff']=effs
+            extend_dict['muon_contained_eff']=effs_contained
+            extend_dict['muon_tracker_eff']=effs_tracker
+            #extend_dict['muon_selected_eff']=np.reciprocal(np.reciprocal(effs_contained)+np.reciprocal(effs_tracker))
+            extend_dict['combined_eff']=effs_combined
+            extend_dict['hadron_selected']=sel
+            extend_dict['muon_contained']=sel_contained
+            extend_dict['muon_tracker']=sel_tracker
+            extend_dict['muon_selected']=np.add(sel_contained,sel_tracker)
+            extend_dict['combined']=sel_combined
+            extend_dict['TotMom']=totmom
+            extend_dict['cos_LepNuAngle']=cosangle
+            extend_dict['LongMom']=np.multiply(totmom,cosangle)
+
+            tree["event_data"].extend(extend_dict)
+
 
 if __name__ == "__main__" :
 
