@@ -140,7 +140,5 @@ draw_histograms_FD(<geoeff_cut>) #For example: draw_histograms_FD(0.1) means 10%
 ### III. Get ND ratios vs FD ratios
 Generate all ND ratios, FD ratios and NDvsFD ratios.
 ```
-root -l -b
-.L /home/fyguo/DUNE_PRISM_GEC_ND/code/NDaFD_RatioPlots.cpp
-NDaFD_RatioPlots(<geoeff_cut>) #For example: NDaFD_RatioPlots(0.1) means 10% geoeff_cut
+root -l -b /home/fyguo/DUNE_PRISM_GEC_ND/code/NDaFD_RatioPlots.cpp
 ```
