@@ -31,8 +31,8 @@ offset = [ 0., 5.5, 411. ]
 APPLY_FV_CUT = True
 
 # Average neutrino decay position in beam coordinates as a function of vertex x (from Luke): Will be used to set the decay position event-by-event.
-OffAxisPoints = array('f', [-2, 0.5, 3,    5.5, 8, 10.5, 13, 15.5, 18,  20.5, 23,  25.5, 28,   30.5])
-meanPDPZ = array('f', [ 93.6072, 93.362,  90.346, 85.6266, 81.1443, 76.6664, 73.0865, 69.8348, 67.5822, 65.005, 62.4821, 60.8336, 59.1433, 57.7352]) #why are these discreet data sets?
+OffAxisPoints = array('f', [-30.5,   -28,    -25.5,   -23,     -20.5,   -18,     -15.5,   -13,    -10.5,   -8,      -5.5,    -3,    -0.5,     0,       0.5,    3,     5.5,    8,      10.5,   13,     15.5,   18,     20.5,  23,     25.5,   28,     30.5])
+meanPDPZ = array('f', [ 57.7352, 59.1433, 60.8336, 62.4821, 65.005, 67.5822, 69.8348, 73.0865, 76.6664, 81.1443, 85.6266, 90.346, 93.362, 93.6072, 93.362,  90.346, 85.6266, 81.1443, 76.6664, 73.0865, 69.8348, 67.5822, 65.005, 62.4821, 60.8336, 59.1433, 57.7352]) #why are these discreet data sets?
 #gDecayZ = TGraph(14, OffAxisPoints, meanPDPZ)
 gDecayZ=interp1d(OffAxisPoints,meanPDPZ,fill_value='extrapolate')
 
@@ -154,26 +154,59 @@ def processFiles(f):
         if APPLY_FV_CUT: CAF["inFV"] = isFV_vec(CAF["vtx_x"], CAF["vtx_y"], CAF["vtx_z"])
         else: CAF["inFV"] = [True]*len(CAF["vtx_x"])
 
+        # Exclude all events which are not inside the ND FV and NC events
+        # Before entering the event loop
+        # vtx_x_selected = []
+        # for i_event in range(len(CAF["vtx_x"])):
+        #     # Check if the event is within the Fiducial Volume
+        #     inFV_event = CAF["inFV"][i_event] == True
+        #
+        #     # Check if isCC is 1 for the event
+        #     isCC_event = CAF["isCC"][i_event] == 1
+        #
+        #     # Select only events that are in FV and isCC is 1
+        #     if inFV_event and isCC_event:
+        #         vtx_x_selected.append(CAF["vtx_x"][i_event])
+        #         print(CAF["vtx_x"][i_event])
+        # print("len_selectedevts: ", len(vtx_x_selected))
         # Get tree with x, y and phi of geometric efficiency throws.
         geoThrows = concatenate("{0}:geoEffThrows".format(f), ['geoEffThrowsY', 'geoEffThrowsZ', 'geoEffThrowsPhi'], library = "np")
-        #geoThrows = concatenate("{0}:ThrowsFD".format(f), ['throwVtxY', 'throwVtxZ', 'throwRot'], library = "np") #FD
+        # geoThrows = concatenate("{0}:ThrowsFD".format(f), ['throwVtxY', 'throwVtxZ', 'throwRot'], library = "np") #FD
 
         # Arrays to store the efficiencies
+        # ND
         effs = np.array([0.]*len(CAF['geoEffThrowResults']), dtype = np.float16)
         effs_tracker = np.array([0.]*len(CAF['geoEffThrowResults']), dtype = np.float16)
         effs_contained = np.array([0.]*len(CAF['geoEffThrowResults']), dtype = np.float16)
         effs_combined = np.array([0.]*len(CAF['geoEffThrowResults']), dtype = np.float16)
-        # effs = np.array([0.]*len(CAF['hadron_throw_result']), dtype = np.float16) #FD
+        # FD
+        # effs = np.array([0.]*len(CAF['hadron_throw_result']), dtype = np.float16)
         # effs_tracker = np.array([0.]*len(CAF['hadron_throw_result']), dtype = np.float16)
         # effs_contained = np.array([0.]*len(CAF['hadron_throw_result']), dtype = np.float16)
         # effs_combined = np.array([0.]*len(CAF['hadron_throw_result']), dtype = np.float16)
+        print("len_geothrowresults: ", len(CAF['geoEffThrowResults']))
 
+        count = 0
         # Event loop
         for i_event in range(len(CAF['geoEffThrowResults'])):
+        # for i_event in range(len(vtx_x_selected))):
+
         # for i_event in range(len(CAF['hadron_throw_result'])):
         #     if i_event==10: break #use when debugging
-        # for i_event in [2991]:
-            #print(i_event)
+
+            # Exclude all events which are not inside the ND FV and choose only CC events
+            if not CAF["inFV"][i_event] or CAF["isCC"][i_event] == 0:
+                # print("i_event: ", i_event ,", i_vtx_x: ", CAF["vtx_x"][i_event], ", i_vtx_y: ", CAF["vtx_y"][i_event]-offset[1], ", i_vtx_z: ",CAF["vtx_z"][i_event]-offset[2])
+                # print("CAF[inFV][i_event]: ", CAF["inFV"][i_event])
+                # print("CAF[isCC][i_event]: ", CAF["isCC"][i_event])
+                # print("t/f: ", isFV_vec(CAF["vtx_x"][i_event], CAF["vtx_y"][i_event], CAF["vtx_z"][i_event]))
+                continue
+            count += 1
+            print("Count: ", count)
+            print("i_event: ", i_event ,", i_vtx_x: ", CAF["vtx_x"][i_event], ", i_vtx_y: ", CAF["vtx_y"][i_event]-offset[1], ", i_vtx_z: ",CAF["vtx_z"][i_event]-offset[2])
+            print("CAF[inFV][i_event]: ", CAF["inFV"][i_event])
+            print("CAF[isCC][i_event]: ", CAF["isCC"][i_event])
+
 
             # Accumulators for efficiency calculation
             # Hadronic efficiency
@@ -192,10 +225,16 @@ def processFiles(f):
             # throws_FV = isFV_vec([CAF["vtx_x"][i_event]]*len(geoThrows["ThrowVtxY"][int(i_event/N_EVENTS_PER_THROW)]), #FD
             #                      geoThrows["ThrowVtxY"][int(i_event/N_EVENTS_PER_THROW)]-offset[1],
             #                      geoThrows["ThrowVtxZ"][int(i_event/N_EVENTS_PER_THROW)]-offset[2])
-
+            # print("len_geoEffThrowsY: ", len(geoThrows["geoEffThrowsY"][int(i_event/N_EVENTS_PER_THROW)]))
+            # print("vtx_x: ", [CAF["vtx_x"][2]], ", geoEffThrowsY: ", geoThrows["geoEffThrowsY"][int(2/N_EVENTS_PER_THROW)]-offset[1], ", geoEffThrowsZ: ", geoThrows["geoEffThrowsZ"][int(2/N_EVENTS_PER_THROW)]-offset[2],
+            #       ", isFV: ", isFV_vec([CAF["vtx_x"][2]]*len(geoThrows["geoEffThrowsY"][int(2/N_EVENTS_PER_THROW)]),
+            #                      geoThrows["geoEffThrowsY"][int(2/N_EVENTS_PER_THROW)]-offset[1],
+            #                      geoThrows["geoEffThrowsZ"][int(2/N_EVENTS_PER_THROW)]-offset[2]),)
             NthrowsInFV = sum(throws_FV) # Count how many throws were in the FV. Will be useful later.
+            print("NthrowsInFV: ", NthrowsInFV)
             # Don't include throws inside the ND_FV
             if NthrowsInFV==0 and APPLY_FV_CUT:
+                print("i_event: ", i_event, "vtx_x: ", [CAF["vtx_x"][i_event]], ", geoEffThrowsY: ", geoThrows["geoEffThrowsY"][i_event]-offset[1], ", geoEffThrowsZ: ", geoThrows["geoEffThrowsZ"][i_event]-offset[2])
                 # effs[i_event]=-1.
                 # effs_tracker[i_event]=-1.
                 # effs_contained[i_event]=-1.
