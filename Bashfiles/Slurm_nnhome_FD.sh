@@ -9,6 +9,6 @@
 #SBATCH --time=180:00:00
 #!/bin/bash
 
-cd /home/fyguo/testbaroncode
-python3 ~/home/fyguo/DUNE_PRISM_GEC_ND/code/FD_maketree.py
+cd /home/fyguo/DUNE_PRISM_GEC_ND/code
+python3 FD_maketree.py
 wait
