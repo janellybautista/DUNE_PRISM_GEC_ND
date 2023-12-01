@@ -38,6 +38,7 @@ Please avoid reading from, copying from, or writing massive amount of files dire
 #### 2. Interactive run
 If you want to run code interactively on ```dunegpvm*``` for debugging, follow instruction in this section.
 ```
+cd DUNE_PRISM_GEC_ND/code
 python3 new_hadron_muon_mktree.py /pnfs/dune/persistent/physicsgroups/dunelbl/abooth/PRISM/Production/Simulation/ND_CAFMaker/v7/CAF/0mgsimple/101/FHC.1101999.CAF.root
 ```
 
