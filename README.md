@@ -48,7 +48,7 @@ python3 new_hadron_muon_mktree.py /pnfs/dune/persistent/physicsgroups/dunelbl/ab
 cd DUNE_PRISM_GEC_ND/code
 # Write list of files into a txt file, remember to change the foldername before submitting job
 ls -d "/pnfs/dune/persistent/physicsgroups/dunelbl/abooth/PRISM/Production/Simulation/ND_CAFMaker/v7/CAF/<folder_name>”/* | sed "s\/pnfs\root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr\g" > NDCAFs.txt
-# For example: ls -d "/pnfs/dune/persistent/physicsgroups/dunelbl/abooth/PRISM/Production/Simulation/ND_CAFMaker/v7/CAF/0mgsimple/100"/* | sed "s\/pnfs\root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr\g" > NDCAFs.txt
+# For example: ls -d "/pnfs/dune/persistent/physicsgroups/dunelbl/abooth/PRISM/Production/Simulation/ND_CAFMaker/v7/CAF/0mgsimple/{100,101,102,103,104,105,106,107,108,109}/* | sed "s\/pnfs\root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr\g" > NDCAFs.txt
 # Now make a tarball
 tar -czvf work.tar.gz setup_NDcombEff.sh new_hadron_muon_mktree.py muonEff30.nn muonEffModel.py NDCAFs.txt
 
