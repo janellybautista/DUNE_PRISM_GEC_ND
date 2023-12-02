@@ -46,7 +46,13 @@ python3 new_hadron_muon_mktree.py /pnfs/dune/persistent/physicsgroups/dunelbl/ab
 ```
 # Make a tarball to send everything you need to run your program on grid node
 cd DUNE_PRISM_GEC_ND/code
-tar -czvf work.tar.gz setup_NDcombEff.sh NDCAFs.txt new_hadron_muon_mktree.py muonEff30.nn muonEffModel.py  
+# Write list of files into a txt file
+ls -d "/pnfs/dune/persistent/physicsgroups/dunelbl/abooth/PRISM/Production/Simulation/ND_CAFMaker/v7/CAF/<folder_name>”/* | sed "s\/pnfs\root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr\g" > NDCAF_<folder_name>.txt
+# For example: ls -d "/pnfs/dune/persistent/physicsgroups/dunelbl/abooth/PRISM/Production/Simulation/ND_CAFMaker/v7/CAF/0mgsimple/100"/* | sed "s\/pnfs\root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr\g" > NDCAF_0mgsimple_100.txt
+# Now make a tarball
+tar -czvf work.tar.gz setup_NDcombEff.sh new_hadron_muon_mktree.py muonEff30.nn muonEffModel.py NDCAF_<folder_name>.txt
+# For example:tar -czvf work.tar.gz setup_NDcombEff.sh new_hadron_muon_mktree.py muonEff30.nn muonEffModel.py NDCAF_0mgsimple_100.txt
+
 
 # The following long command submits your job:
 # -N 2 means 2 jobs, this is now set as running 1 file per job as I have two files in txt file.
