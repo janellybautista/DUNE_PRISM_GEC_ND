@@ -4,7 +4,7 @@ echo "Running on $(hostname) at ${GLIDEIN_Site}. GLIDEIN_DUNESite = ${GLIDEIN_DU
 
 # Set the output location for copyback
 #OUTDIR=/pnfs/dune/persistent/users/${GRID_USER}/myFDntuples
-OUTDIR=/pnfs/dune/scratch/users/${GRID_USER}/NDeff_muon
+OUTDIR=/pnfs/dune/scratch/users/${GRID_USER}/NDeff_FDhadron
 
 # Make sure we see what we expect
 echo "See where are at: pwd" # this normally is _CONDOR_JOB_IWD
@@ -34,10 +34,12 @@ echo "cd _CONDOR_JOB_IWD: ${_CONDOR_JOB_IWD}"
 cd ${_CONDOR_JOB_IWD}
 
 echo "Install dependencies"
-echo "pip install --target=${_CONDOR_JOB_IWD} uproot4"
-pip install --target=${_CONDOR_JOB_IWD} uproot4
-echo "pip install --target=${_CONDOR_JOB_IWD} uproot3"
-pip install --target=${_CONDOR_JOB_IWD} uproot3
+echo "pip install --target=${_CONDOR_JOB_IWD} uproot"
+pip install --target=${_CONDOR_JOB_IWD} uproot
+# echo "pip install --target=${_CONDOR_JOB_IWD} uproot4"
+# pip install --target=${_CONDOR_JOB_IWD} uproot4
+# echo "pip install --target=${_CONDOR_JOB_IWD} uproot3"
+# pip install --target=${_CONDOR_JOB_IWD} uproot3
 echo "pip install --target=${_CONDOR_JOB_IWD} torch"
 pip install --target=${_CONDOR_JOB_IWD} torch
 echo "pip install --target=${_CONDOR_JOB_IWD} scipy"
@@ -50,7 +52,7 @@ echo "ls -l _CONDOR_JOB_IWD"
 ls -l ${_CONDOR_JOB_IWD}
 
 # Symlink the desired file to the current directory
-ln -s ${INPUT_TAR_DIR_LOCAL}/new_hadron_muon_mktree.py .
+ln -s ${INPUT_TAR_DIR_LOCAL}/FD_maketree.py .
 ln -s ${INPUT_TAR_DIR_LOCAL}/muonEff30.nn .
 ln -s ${INPUT_TAR_DIR_LOCAL}/muonEffModel.py .
 #echo "Did the symlink"
@@ -79,7 +81,7 @@ myinfile=""
 (( LINE_N = ${PROCESS} + 1 ))
 
 # Loop over file list in txt file
-for ifile in $(cat ${INPUT_TAR_DIR_LOCAL}/NDCAFs.txt | head -${LINE_N} | tail -1); do
+for ifile in $(cat ${INPUT_TAR_DIR_LOCAL}/FDCAFs.txt | head -${LINE_N} | tail -1); do
   myinfile="${myinfile} ${ifile}"
 done
 
@@ -93,8 +95,8 @@ ifdh cp -D $myinfile ${_CONDOR_JOB_IWD}
 echo "ls -l _CONDOR_JOB_IWD"
 ls -l ${_CONDOR_JOB_IWD}
 
-echo "python3 new_hadron_muon_mktree.py ./*CAF.root"
-python3 new_hadron_muon_mktree.py ./*CAF.root
+echo "python3 FD_maketree.py ./*.root"
+python3 FD_maketree.py ./*.root
 LAR_RESULT=$?   # check the exit status!!!
 
 if [ $LAR_RESULT -ne 0 ]; then
@@ -108,12 +110,12 @@ echo "ls -l _CONDOR_JOB_IWD"
 ls -l ${_CONDOR_JOB_IWD}
 
 # Unique name in case we send multiple jobs.
-OUTFILE=NDGeoEff_${CLUSTER}_${PROCESS}.root
+OUTFILE=FDGeoEff_${CLUSTER}_${PROCESS}.root
 
-if [ -f Output_NDGeoEff.root ]; then
+if [ -f Output_FDGeoEff.root ]; then
 
-  echo "mv Output_NDGeoEff.root $OUTFILE"
-  mv Output_NDGeoEff.root $OUTFILE
+  echo "mv Output_FDGeoEff.root $OUTFILE"
+  mv Output_FDGeoEff.root $OUTFILE
 
   echo "Found output root file, now copy to scratch area: $OUTDIR"
   # and copy our output file back
