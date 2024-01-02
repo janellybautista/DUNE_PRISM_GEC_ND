@@ -491,7 +491,7 @@ def processFiles(f):
                 'hadron_selected': filtered_sel,
                 'muon_contained': filtered_sel_contained,
                 'muon_tracker': filtered_sel_tracker,
-                'muon_selected': np.logical_or(filtered_sel_contained, filtered_sel_tracker),
+                'muon_selected': np.logical_and(filtered_sel_contained, filtered_sel_tracker),
                 'combined': filtered_sel_combined
             }
             tree["event_data"].extend(extend_dict)
