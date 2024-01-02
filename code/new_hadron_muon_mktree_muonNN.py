@@ -387,7 +387,7 @@ def processFiles(f):
         nd_lep_tracker_prob_nonecc = np.array(netOut[:,1], dtype = float)
         print ("--- nn prob. contained: ", nd_lep_contained_prob_nonecc, ", tracker: ", nd_lep_tracker_prob_nonecc)
 
-        sel_combined = np.logical_and(np.logical_or(nd_lep_tracker_prob_nonecc, nd_lep_contained_prob_nonecc), sel)
+        sel_combined = np.logical_and(np.logical_and(nd_lep_tracker_prob_nonecc, nd_lep_contained_prob_nonecc), sel)
 
 
         i=0
