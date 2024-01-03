@@ -57,7 +57,7 @@ Para pr[]= //position is in units of cm, momentum is in units of GeV/c, angle is
   // {"LepMomX", "GeV", true, -2., 2., &XLepMom},
   // {"LepMomY", "GeV", true, -4.5, 2., &YLepMom},
   // {"LepMomZ", "GeV", true, -0.5, 7., &ZLepMom},
-  {"LepMomTot", "GeV", false, 0., 7., &TotalMom},
+  {"LepMomTot", "GeV", false, 0., 10., &TotalMom},
   {"cos_LepNuAngle", "", false, 0., 1., &cos_angle},
   // {"LongMom", "GeV", false, -1., 7., &LongitudinalMom},
   {"Ev", "GeV", true, 0., 10., &ev},

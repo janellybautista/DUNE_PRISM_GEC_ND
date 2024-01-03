@@ -52,7 +52,7 @@ Para pr[]= //position is in units of cm, momentum is in units of GeV/c, angle is
   // {"LepMomX", -2., 2.},
   // {"LepMomY", -4.5, 2.},
   // {"LepMomZ", -0.5, 7.},
-  {"LepMomTot", 0., 16.},
+  {"LepMomTot", 0., 10.},
   {"cos_LepNuAngle", 0., 1.},
   // {"LongMom", 0., 7.},
   {"Ev", 0., 10.},
