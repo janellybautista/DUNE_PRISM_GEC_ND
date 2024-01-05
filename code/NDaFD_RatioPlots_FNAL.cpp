@@ -42,23 +42,9 @@ Para pr[]= //position is in units of cm, momentum is in units of GeV/c, angle is
   {"LepMomTot","GeV", 0., 10.},
   {"cos_LepNuAngle"," ", 0., 1.},
   {"Ev", "GeV",0., 10.},// {"ND_Gen_numu_E", 0., 10.},
-  {"E_vis_true", "GeV",0., 10.}// {"ND_", 0., 10.}
+  {"E_vis_true", "GeV",0., 10.}// {"ND_E_vis_true", 0., 10.}
 };
 
-// struct sel_type
-// {
-//   const char* sel_name;
-//   const char* eff_name;
-// };
-//
-// sel_type br[]=
-// {
-//   {"muon_contained", "muon_contained_eff"},
-//   {"muon_tracker", "muon_tracker_eff"},
-//   {"muon_selected", "muon_selected_eff"},
-//   {"hadron_selected", "hadron_selected_eff"},
-//   {"combined", "combined_eff"},
-// };
 struct sel_type
 {
   const char* sel_name;
@@ -105,6 +91,7 @@ void populate_histograms_FD(char* eff,char* caf,vector<vector<TH1D*>>& hists1,ve
 
     // unsigned long lar_pos=14; // on axis pos
     unsigned long lar_pos=2; // on axis pos
+    e_vis_true += 0.10566; // 0.10566 is the mass of lepton. since we use only kinetic energy of lepton when reconstructing the e_vis_true
 
     int k=0;
     for (Para item:pr) {
@@ -126,14 +113,14 @@ void populate_histograms_FD(char* eff,char* caf,vector<vector<TH1D*>>& hists1,ve
           n++;
           if (vtx_pos==0||vtx_pos==1||vtx_pos==2||vtx_pos==4||vtx_pos==5||vtx_pos==16||vtx_pos==17||vtx_pos==19||vtx_pos==20||vtx_pos==21) continue;
 
-          // // only pick center region: vtx_pos at -24cm and 24cm
+          // only pick center region: vtx_pos at -24cm and 24cm
           // if (vtx_pos != 10 && vtx_pos != 11) continue;
           // cout << "vtx_pos: " << vtx_pos << endl;
 
           if (k==0) var_type=sqrt(pow((*xyz_mom)[lar_pos][vtx_pos][0],2)+pow((*xyz_mom)[lar_pos][vtx_pos][1],2)+pow((*xyz_mom)[lar_pos][vtx_pos][2],2));
           else if (k==1) var_type=cos(lepnuangle);
-          else if (k==2) var_type=e_vis_true;
-          else if (k==3) var_type=numu_e;
+          else if (k==2) var_type=numu_e;
+          else if (k==3) var_type=e_vis_true;
 
           vector<vector<double>>* eff_value=sel.eff_value;
           vector<vector<double>>& eff_value2=*eff_value;
@@ -156,29 +143,38 @@ void populate_histograms_FD(char* eff,char* caf,vector<vector<TH1D*>>& hists1,ve
   caf_file.Close();
 }
 
-void NDaFD_RatioPlots_FNAL()
+void NDaFD_RatioPlots_FNAL(double geoeff_cut)
 {
-  vector<double> geoeff_cut_threshold = {0.01};
+  // vector<double> geoeff_cut_threshold = {0.08};
+  // vector<double> geoeff_cut_threshold = {0.1, 0.08, 0.06, 0.04, 0.02, 0.01};
 
-  for (double geoeff_cut:geoeff_cut_threshold)
-  {
+  // for (double geoeff_cut:geoeff_cut_threshold)
+  // {
 
     br[0].sel_name = "muon_contained"; // Have to initialize the br first!!! Not sure the reason, but keep it!!!
-
+    TH1::AddDirectory(kFALSE); // Avoid Using Global Directory and potential memory leak
     // FD files
     char eff[9999];
     char caf[9999];
+    memset(eff, 0, 9999); // clear array each time
+    memset(caf, 0, 9999);
     gSystem->Exec("rm -f AutoDict*vector*vector*vector*double*"); // Remove old dictionary if exists
     gInterpreter->GenerateDictionary("vector<vector<vector<double>>>", "vector");
 
     vector<vector<TH1D*>> histograms1;
     vector<vector<TH1D*>> histograms2;
     vector<vector<TH1D*>> histograms3;
+    histograms1.clear();
+    histograms2.clear();
+    histograms3.clear();
 
     for(auto& sel:br)
     {
       const char* dt=sel.sel_name;
       vector<TH1D*> histset1, histset2,histset3;
+      histset1.clear();
+      histset2.clear();
+      histset3.clear();
       histograms1.push_back(histset1);
       histograms2.push_back(histset2);
       histograms3.push_back(histset3);
@@ -196,7 +192,7 @@ void NDaFD_RatioPlots_FNAL()
 
 
 
-    for (int j=0; j<8000; j++)
+    for (int j=0; j<8016; j++)
     // for (int j=0; j<8; j++)
     {
       memset(eff, 0, 9999); // clear array each time
@@ -248,12 +244,12 @@ void NDaFD_RatioPlots_FNAL()
         const char *fd=item.field;
 
         // sprintf(sel_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_center/%0.3f_eff_veto_cut_ND/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd);
-        sprintf(sel_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/%0.3f_eff_veto_cut_ND/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd);
+        sprintf(sel_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_test/%0.3f_eff_veto_cut_ND/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd);
         sel_files[index]=new TFile(sel_path, "read");
         sel_histograms[index]=(TH1D*)sel_files[index]->Get(Form("selection-cut_%s_%s",dt,fd));
 
         // sprintf(geo_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_center/%0.3f_eff_veto_cut_ND/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd);
-        sprintf(geo_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/%0.3f_eff_veto_cut_ND/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd);
+        sprintf(geo_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_test/%0.3f_eff_veto_cut_ND/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd);
         geo_files[index]=new TFile(geo_path, "read");
         geo_histograms[index]=(TH1D*)geo_files[index]->Get(Form("geo-corrected_%s_%s",dt,fd));
         index++;
@@ -265,7 +261,7 @@ void NDaFD_RatioPlots_FNAL()
     {
       const char *fd=item.field;
       // sprintf(raw_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_center/%0.3f_eff_veto_cut_ND/%s/raw_%s.root",geoeff_cut,fd,fd);
-      sprintf(raw_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/%0.3f_eff_veto_cut_ND/%s/raw_%s.root",geoeff_cut,fd,fd);
+      sprintf(raw_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_test/%0.3f_eff_veto_cut_ND/%s/raw_%s.root",geoeff_cut,fd,fd);
       raw_files[index_raw]=new TFile(raw_path, "read");
       raw_histograms[index_raw]=(TH1D*)raw_files[index_raw]->Get(Form("raw_%s",fd));
       index_raw++;
@@ -283,7 +279,7 @@ void NDaFD_RatioPlots_FNAL()
 
     // Create a folder before drawing plots
     // gSystem->mkdir(TString::Format("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio_center/%0.3f_eff_veto_cut", geoeff_cut), kTRUE);
-    gSystem->mkdir(TString::Format("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio/%0.3f_eff_veto_cut", geoeff_cut), kTRUE);
+    gSystem->mkdir(TString::Format("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_test/ratio/%0.3f_eff_veto_cut", geoeff_cut), kTRUE);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -294,7 +290,6 @@ void NDaFD_RatioPlots_FNAL()
     // Create hist arrays
     // Create Canvas
     TCanvas *c_ratio[5];
-    TH1::AddDirectory(kFALSE);
 
     TPad** uppad = new TPad*[5];
     TLegend** uppad_L = new TLegend*[5];
@@ -404,10 +399,10 @@ void NDaFD_RatioPlots_FNAL()
       }
       cs_ND[i_ND]->Update();
       // cs_ND[i_ND]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio_center/%0.3f_eff_veto_cut/ND_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins.png",geoeff_cut,dt,geoeff_cut));
-      cs_ND[i_ND]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio/%0.3f_eff_veto_cut/ND_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins.png",geoeff_cut,dt,geoeff_cut));
+      cs_ND[i_ND]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_test/ratio/%0.3f_eff_veto_cut/ND_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins.png",geoeff_cut,dt,geoeff_cut));
       rs_ND[i_ND]->Update();
       // rs_ND[i_ND]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio_center/%0.3f_eff_veto_cut/ND_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));;
-      rs_ND[i_ND]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio/%0.3f_eff_veto_cut/ND_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));;
+      rs_ND[i_ND]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_test/ratio/%0.3f_eff_veto_cut/ND_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));;
 
       i_ND++;
     } // end ND plots;
@@ -506,8 +501,8 @@ void NDaFD_RatioPlots_FNAL()
       rs[i-1]->Update();
       // cs[i-1]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio_center/%0.3f_eff_veto_cut/FD_1760931_%s_less_edge_pos_%0.3f_eff_cut_hists.png", geoeff_cut,dt,geoeff_cut));
       // rs[i-1]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio_center/%0.3f_eff_veto_cut/FD_1760931_%s_less_edge_pos_%0.3f_eff_cut_hists_ratios.png", geoeff_cut,dt,geoeff_cut));
-      cs[i-1]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio/%0.3f_eff_veto_cut/FD_1760931_%s_less_edge_pos_%0.3f_eff_cut_hists.png", geoeff_cut,dt,geoeff_cut));
-      rs[i-1]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio/%0.3f_eff_veto_cut/FD_1760931_%s_less_edge_pos_%0.3f_eff_cut_hists_ratios.png", geoeff_cut,dt,geoeff_cut));
+      cs[i-1]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_test/ratio/%0.3f_eff_veto_cut/FD_1760931_%s_less_edge_pos_%0.3f_eff_cut_hists.png", geoeff_cut,dt,geoeff_cut));
+      rs[i-1]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_test/ratio/%0.3f_eff_veto_cut/FD_1760931_%s_less_edge_pos_%0.3f_eff_cut_hists_ratios.png", geoeff_cut,dt,geoeff_cut));
 
       i++;
     }// end br loop
@@ -550,7 +545,7 @@ void NDaFD_RatioPlots_FNAL()
         ratio_ND_GvR[NDvFD_index]->SetAxisRange(0.,1.4,"Y");
         ratio_ND_GvR[NDvFD_index]->Draw("hist");
         // draw ND ratio: sel vs raw
-        ratio_ND_SvR[NDvFD_index]->SetLineColor(kRed);
+        ratio_ND_SvR[NDvFD_index]->SetLineColor(kGreen+4);
         ratio_ND_SvR[NDvFD_index]->Draw("samehist");
         // draw ND ratio: sel vs geo
         // ratio_ND_SvG[NDvFD_index]->SetLineColor(kBlue);
@@ -559,7 +554,7 @@ void NDaFD_RatioPlots_FNAL()
         ratio_FD_TvR[NDvFD_index]->SetLineColor(kCyan+1);
         ratio_FD_TvR[NDvFD_index]->Draw("samehist");
         // draw FD ratio: selected vs raw
-        ratio_FD_SvR[NDvFD_index]->SetLineColor(kMagenta);
+        ratio_FD_SvR[NDvFD_index]->SetLineColor(kGreen);
         ratio_FD_SvR[NDvFD_index]->Draw("samehist");
         // draw FD ratio: selected vs targeted
         // ratio_FD_SvT[NDvFD_index]->SetLineColor(kCyan+1);
@@ -616,7 +611,7 @@ void NDaFD_RatioPlots_FNAL()
         // ND: SvR vs FD: SvR
         ratioNDvFD_2[NDvFD_index] = (TH1D*)ratio_ND_SvR[NDvFD_index]->Clone();
         ratioNDvFD_2[NDvFD_index]->Divide(ratio_FD_SvR[NDvFD_index]);
-        ratioNDvFD_2[NDvFD_index]->SetLineColor(kRed);
+        ratioNDvFD_2[NDvFD_index]->SetLineColor(kGreen);
         ratioNDvFD_2[NDvFD_index]->SetLineStyle(1);
         ratioNDvFD_2[NDvFD_index]->SetMinimum(0.);
         ratioNDvFD_2[NDvFD_index]->SetMaximum(2.);
@@ -624,7 +619,7 @@ void NDaFD_RatioPlots_FNAL()
         ratioNDvFD_2[NDvFD_index]->SetStats(0);
         // ratioNDvFD_2[NDvFD_index]->SetLineWidth(0); // 0: No error bars; 1: error bars
         ratioNDvFD_2[NDvFD_index]->SetMarkerStyle(21);
-        ratioNDvFD_2[NDvFD_index]->SetMarkerColor(kRed); // 1: black; 3: green; 6: pink
+        ratioNDvFD_2[NDvFD_index]->SetMarkerColor(kGreen); // 1: black; 3: green; 6: pink
         ratioNDvFD_2[NDvFD_index]->SetMarkerSize(0.5);// 0.4: w/ error bars; 0.5: w/o error bars
         ratioNDvFD_2[NDvFD_index]->Draw("HIST L P SAME");
         //------------------------------------------------------------------------
@@ -664,7 +659,7 @@ void NDaFD_RatioPlots_FNAL()
 
       c_ratio[i_NDvFD]->Update();
       // c_ratio[i_NDvFD]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio_center/%0.3f_eff_veto_cut/NDvFD_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));
-      c_ratio[i_NDvFD]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio/%0.3f_eff_veto_cut/NDvFD_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));
+      c_ratio[i_NDvFD]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_test/ratio/%0.3f_eff_veto_cut/NDvFD_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));
 
 
       i_NDvFD++;
@@ -688,6 +683,6 @@ void NDaFD_RatioPlots_FNAL()
     delete[] ratioNDvFD_1;
     delete[] ratioNDvFD_2;
     delete[] ratioNDvFD_3;
-  } //end geoeff_cut_threshold
+  // } //end geoeff_cut_threshold
 
 } // end NDaFD_RatioPlots
