@@ -360,16 +360,34 @@ def processFiles(f):
 
         had_containment = CAF["Ehad_veto"] < 30
         sel = np.logical_and(had_containment, fv)
-        sel_tracker = np.logical_and(CAF['muon_tracker'] > 0, fv)
-        isContained_vec = np.vectorize(isContained)
-        sel_contained = np.logical_and(isContained_vec(CAF["muon_endpoint"][:,0], CAF["muon_endpoint"][:,1], CAF["muon_endpoint"][:,2]), fv)
-        sel_combined = np.logical_and(np.logical_or(sel_tracker, sel_contained), sel)
-        for i_event in range(len(sel_contained)):
-            if ((sel_contained[i_event]==True) and (sel_tracker[i_event]==True)):
-                print("event #", end="")
-                print(i_event, end=" ")
-                print("in file "+f+" is both contained and tracker-matched!")
-        #print("Number in FV {0}, number contained {1}, number in FV and contained {2}".format(sum(fv), sum(had_containment), sum(sel)))
+        # sel_tracker = np.logical_and(CAF['muon_tracker'] > 0, fv)
+        # isContained_vec = np.vectorize(isContained)
+        # sel_contained = np.logical_and(isContained_vec(CAF["muon_endpoint"][:,0], CAF["muon_endpoint"][:,1], CAF["muon_endpoint"][:,2]), fv)
+        # sel_combined = np.logical_and(np.logical_or(sel_tracker, sel_contained), sel)
+        # for i_event in range(len(sel_contained)):
+        #     if ((sel_contained[i_event]==True) and (sel_tracker[i_event]==True)):
+        #         print("event #", end="")
+        #         print(i_event, end=" ")
+        #         print("in file "+f+" is both contained and tracker-matched!")
+        # #print("Number in FV {0}, number contained {1}, number in FV and contained {2}".format(sum(fv), sum(had_containment), sum(sel)))
+
+        # Use muon NN for ND event itself
+        # Input features for nn: momentum and vertex from CAF file
+        inputfeatures = np.column_stack((CAF["LepMomX"], CAF["LepMomY"], CAF["LepMomZ"], CAF["vtx_x"], CAF["vtx_y"], CAF["vtx_z"]))
+        # Convert to Pytorch tensor
+        inputfeatures = torch.as_tensor(inputfeatures).type(torch.FloatTensor)
+        # Evaluate neural network
+        with torch.no_grad() :
+            netOut = net(inputfeatures)
+            netOut = torch.nn.functional.softmax(netOut, dim=1).detach().numpy()
+
+        # Get contained probability for this ND event
+        nd_lep_contained_prob_nonecc = np.array(netOut[:,0], dtype = float)
+        # Get tracker probability
+        nd_lep_tracker_prob_nonecc = np.array(netOut[:,1], dtype = float)
+        print ("--- nn prob. contained: ", nd_lep_contained_prob_nonecc, ", tracker: ", nd_lep_tracker_prob_nonecc)
+
+        sel_combined = np.multiply(np.add(nd_lep_tracker_prob_nonecc, nd_lep_contained_prob_nonecc), sel)
 
         i=0
         while i<len(effs):
@@ -406,8 +424,8 @@ def processFiles(f):
         filtered_effs_tracker = effs_tracker[mask]
         filtered_effs_combined = effs_combined[mask]
         filtered_sel = sel[mask]
-        filtered_sel_tracker = sel_tracker[mask]
-        filtered_sel_contained = sel_contained[mask]
+        filtered_sel_tracker = nd_lep_tracker_prob_nonecc[mask]
+        filtered_sel_contained = nd_lep_contained_prob_nonecc[mask]
         filtered_sel_combined = sel_combined[mask]
 
 # NOTE: IF saving the efficiencies to ROOT TTree for further processing, this is the place to Fill the TTree with the effs[i_event] variables. This might interfere with multi-processing, so I recommend doing this only with NUM_PROCS set to 1.
@@ -428,6 +446,9 @@ def processFiles(f):
                 filtered_CAF['eOther'] +
                 filtered_CAF['nipi0'] * pi0_mass
             )
+            # 'nipi0' * pi0_mass is the total Mass
+            # ePi0 is the KE which is got from PDS, it will create signal in both charge and light format
+            # Energy of Pi0 is the sum of ePi0 (KE) + 'nipi0' * pi0_mass (Mass)
 
             #effs_selected=np.reciprocal(np.reciprocal(effs_contained)+np.reciprocal(effs_tracker))
 
@@ -450,11 +471,11 @@ def processFiles(f):
                                                  #'muon_selected_eff':np.float64,
                                                  'hadron_selected_eff':np.float64,
                                                  'combined_eff':np.float64,
-                                                 'hadron_selected':np.int32,
-                                                 'muon_contained':np.int32,
-                                                 'muon_tracker':np.int32,
-                                                 'muon_selected':np.int32,
-                                                 'combined':np.int32})
+                                                 'hadron_selected':np.float64,
+                                                 'muon_contained':np.float64,
+                                                 'muon_tracker':np.float64,
+                                                 'muon_selected':np.float64,
+                                                 'combined':np.float64})
 
             extend_dict = {
                 'isCC': filtered_CAF['isCC'],
@@ -472,7 +493,7 @@ def processFiles(f):
                 'hadron_selected': filtered_sel,
                 'muon_contained': filtered_sel_contained,
                 'muon_tracker': filtered_sel_tracker,
-                'muon_selected': np.logical_or(filtered_sel_contained, filtered_sel_tracker),
+                'muon_selected': np.add(filtered_sel_contained, filtered_sel_tracker),
                 'combined': filtered_sel_combined
             }
             tree["event_data"].extend(extend_dict)
