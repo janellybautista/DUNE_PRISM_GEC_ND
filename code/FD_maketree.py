@@ -66,7 +66,7 @@ TreeVars=["ND_OffAxis_Sim_mu_start_v_xyz_LAr", "ND_OffAxis_Sim_mu_start_p_xyz_LA
 def processFiles(f):
     #output="/storage/shared/barwu/FDCAFIntegration4GEC_wei/"+splitext(basename(f))[0]+"_Eff.root"
     #output="/storage/shared/barwu/10thTry/FDEff/"+splitext(basename(f))[0]+"_Eff.root"
-    output="/home/fyguo/FD_GeoEff_root/FDGeoEff_2811722_Eff/"+splitext(basename(f))[0]+"_Eff.root"
+    output="Output_FDGeoEff.root"
     # if exists(output)==True:
     #      print("file already exists")
     #      return None
@@ -302,9 +302,9 @@ def processFiles(f):
 
 if __name__=="__main__":
     net=muonEffModel()
-    net.load_state_dict(torch.load("/home/barwu/repos/MuonEffNN/8thTry/muonEff30.nn",map_location=torch.device('cpu')))
+    net.load_state_dict(torch.load("./muonEff30.nn",map_location=torch.device('cpu')))
     net.eval()
-    hadron_file="/home/fyguo/FD_GeoEff_root/FDGeoEff_2811722/FDGeoEff_2811722_*.root"
+    hadron_file=str(sys.argv[1])
     allFiles=glob(hadron_file)
     #if len(allFiles)<NUM_PROCS:
         #print("Fewer files than processes, setting NUM_PROC to {0}".format(len(allFiles)))
