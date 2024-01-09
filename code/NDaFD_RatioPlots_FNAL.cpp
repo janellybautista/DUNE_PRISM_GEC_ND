@@ -243,13 +243,13 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
       {
         const char *fd=item.field;
 
-        // sprintf(sel_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_center/%0.3f_eff_veto_cut_ND/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd);
-        sprintf(sel_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_test/%0.3f_eff_veto_cut_ND/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd);
+        sprintf(sel_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN_center/%0.3f_eff_veto_cut_ND/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd);
+        // sprintf(sel_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN/%0.3f_eff_veto_cut_ND/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd);
         sel_files[index]=new TFile(sel_path, "read");
         sel_histograms[index]=(TH1D*)sel_files[index]->Get(Form("selection-cut_%s_%s",dt,fd));
 
-        // sprintf(geo_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_center/%0.3f_eff_veto_cut_ND/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd);
-        sprintf(geo_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_test/%0.3f_eff_veto_cut_ND/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd);
+        sprintf(geo_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN_center/%0.3f_eff_veto_cut_ND/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd);
+        // sprintf(geo_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN/%0.3f_eff_veto_cut_ND/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd);
         geo_files[index]=new TFile(geo_path, "read");
         geo_histograms[index]=(TH1D*)geo_files[index]->Get(Form("geo-corrected_%s_%s",dt,fd));
         index++;
@@ -260,8 +260,8 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
     for (Para item:pr)
     {
       const char *fd=item.field;
-      // sprintf(raw_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_center/%0.3f_eff_veto_cut_ND/%s/raw_%s.root",geoeff_cut,fd,fd);
-      sprintf(raw_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_test/%0.3f_eff_veto_cut_ND/%s/raw_%s.root",geoeff_cut,fd,fd);
+      sprintf(raw_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN_center/%0.3f_eff_veto_cut_ND/%s/raw_%s.root",geoeff_cut,fd,fd);
+      // sprintf(raw_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN/%0.3f_eff_veto_cut_ND/%s/raw_%s.root",geoeff_cut,fd,fd);
       raw_files[index_raw]=new TFile(raw_path, "read");
       raw_histograms[index_raw]=(TH1D*)raw_files[index_raw]->Get(Form("raw_%s",fd));
       index_raw++;
@@ -279,7 +279,7 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
 
     // Create a folder before drawing plots
     // gSystem->mkdir(TString::Format("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio_center/%0.3f_eff_veto_cut", geoeff_cut), kTRUE);
-    gSystem->mkdir(TString::Format("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_test/ratio/%0.3f_eff_veto_cut", geoeff_cut), kTRUE);
+    gSystem->mkdir(TString::Format("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN/ratio_zoomin/%0.3f_eff_veto_cut", geoeff_cut), kTRUE);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -399,10 +399,10 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
       }
       cs_ND[i_ND]->Update();
       // cs_ND[i_ND]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio_center/%0.3f_eff_veto_cut/ND_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins.png",geoeff_cut,dt,geoeff_cut));
-      cs_ND[i_ND]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_test/ratio/%0.3f_eff_veto_cut/ND_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins.png",geoeff_cut,dt,geoeff_cut));
+      cs_ND[i_ND]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN/ratio_zoomin/%0.3f_eff_veto_cut/ND_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins.png",geoeff_cut,dt,geoeff_cut));
       rs_ND[i_ND]->Update();
       // rs_ND[i_ND]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio_center/%0.3f_eff_veto_cut/ND_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));;
-      rs_ND[i_ND]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_test/ratio/%0.3f_eff_veto_cut/ND_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));;
+      rs_ND[i_ND]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN/ratio_zoomin/%0.3f_eff_veto_cut/ND_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));;
 
       i_ND++;
     } // end ND plots;
@@ -501,8 +501,8 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
       rs[i-1]->Update();
       // cs[i-1]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio_center/%0.3f_eff_veto_cut/FD_1760931_%s_less_edge_pos_%0.3f_eff_cut_hists.png", geoeff_cut,dt,geoeff_cut));
       // rs[i-1]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio_center/%0.3f_eff_veto_cut/FD_1760931_%s_less_edge_pos_%0.3f_eff_cut_hists_ratios.png", geoeff_cut,dt,geoeff_cut));
-      cs[i-1]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_test/ratio/%0.3f_eff_veto_cut/FD_1760931_%s_less_edge_pos_%0.3f_eff_cut_hists.png", geoeff_cut,dt,geoeff_cut));
-      rs[i-1]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_test/ratio/%0.3f_eff_veto_cut/FD_1760931_%s_less_edge_pos_%0.3f_eff_cut_hists_ratios.png", geoeff_cut,dt,geoeff_cut));
+      cs[i-1]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN/ratio_zoomin/%0.3f_eff_veto_cut/FD_1760931_%s_less_edge_pos_%0.3f_eff_cut_hists.png", geoeff_cut,dt,geoeff_cut));
+      rs[i-1]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN/ratio_zoomin/%0.3f_eff_veto_cut/FD_1760931_%s_less_edge_pos_%0.3f_eff_cut_hists_ratios.png", geoeff_cut,dt,geoeff_cut));
 
       i++;
     }// end br loop
@@ -583,8 +583,8 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
         ratioNDvFD_1[NDvFD_index]->Divide(ratio_FD_TvR[NDvFD_index]);
         ratioNDvFD_1[NDvFD_index]->SetLineColor(kBlue);
         ratioNDvFD_1[NDvFD_index]->SetLineStyle(1);
-        ratioNDvFD_1[NDvFD_index]->SetMinimum(0.);
-        ratioNDvFD_1[NDvFD_index]->SetMaximum(2.);
+        ratioNDvFD_1[NDvFD_index]->SetMinimum(0.7);
+        ratioNDvFD_1[NDvFD_index]->SetMaximum(1.3);
         // ratioNDvFD_1[NDvFD_index]->Sumw2(); //Create structure to store sum of squares of weights.
         ratioNDvFD_1[NDvFD_index]->SetStats(0);
         // ratioNDvFD_1[NDvFD_index]->SetLineWidth(0); // 0: No error bars; 1: error bars
@@ -613,8 +613,8 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
         ratioNDvFD_2[NDvFD_index]->Divide(ratio_FD_SvR[NDvFD_index]);
         ratioNDvFD_2[NDvFD_index]->SetLineColor(kGreen);
         ratioNDvFD_2[NDvFD_index]->SetLineStyle(1);
-        ratioNDvFD_2[NDvFD_index]->SetMinimum(0.);
-        ratioNDvFD_2[NDvFD_index]->SetMaximum(2.);
+        ratioNDvFD_2[NDvFD_index]->SetMinimum(0.7);
+        ratioNDvFD_2[NDvFD_index]->SetMaximum(1.3);
         // ratioNDvFD_2[NDvFD_index]->Sumw2(); //Create structure to store sum of squares of weights.
         ratioNDvFD_2[NDvFD_index]->SetStats(0);
         // ratioNDvFD_2[NDvFD_index]->SetLineWidth(0); // 0: No error bars; 1: error bars
@@ -659,7 +659,8 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
 
       c_ratio[i_NDvFD]->Update();
       // c_ratio[i_NDvFD]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio_center/%0.3f_eff_veto_cut/NDvFD_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));
-      c_ratio[i_NDvFD]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_test/ratio/%0.3f_eff_veto_cut/NDvFD_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));
+      // c_ratio[i_NDvFD]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN/ratio/%0.3f_eff_veto_cut/NDvFD_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));
+      c_ratio[i_NDvFD]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN/ratio_zoomin/%0.3f_eff_veto_cut/NDvFD_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));
 
 
       i_NDvFD++;
