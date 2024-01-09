@@ -243,13 +243,13 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
       {
         const char *fd=item.field;
 
-        sprintf(sel_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN_center/%0.3f_eff_veto_cut_ND/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd);
-        // sprintf(sel_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN/%0.3f_eff_veto_cut_ND/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd);
+        // sprintf(sel_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN_center/%0.3f_eff_veto_cut_ND/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd);
+        sprintf(sel_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN/%0.3f_eff_veto_cut_ND/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd);
         sel_files[index]=new TFile(sel_path, "read");
         sel_histograms[index]=(TH1D*)sel_files[index]->Get(Form("selection-cut_%s_%s",dt,fd));
 
-        sprintf(geo_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN_center/%0.3f_eff_veto_cut_ND/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd);
-        // sprintf(geo_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN/%0.3f_eff_veto_cut_ND/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd);
+        // sprintf(geo_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN_center/%0.3f_eff_veto_cut_ND/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd);
+        sprintf(geo_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN/%0.3f_eff_veto_cut_ND/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd);
         geo_files[index]=new TFile(geo_path, "read");
         geo_histograms[index]=(TH1D*)geo_files[index]->Get(Form("geo-corrected_%s_%s",dt,fd));
         index++;
@@ -260,8 +260,8 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
     for (Para item:pr)
     {
       const char *fd=item.field;
-      sprintf(raw_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN_center/%0.3f_eff_veto_cut_ND/%s/raw_%s.root",geoeff_cut,fd,fd);
-      // sprintf(raw_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN/%0.3f_eff_veto_cut_ND/%s/raw_%s.root",geoeff_cut,fd,fd);
+      // sprintf(raw_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN_center/%0.3f_eff_veto_cut_ND/%s/raw_%s.root",geoeff_cut,fd,fd);
+      sprintf(raw_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN/%0.3f_eff_veto_cut_ND/%s/raw_%s.root",geoeff_cut,fd,fd);
       raw_files[index_raw]=new TFile(raw_path, "read");
       raw_histograms[index_raw]=(TH1D*)raw_files[index_raw]->Get(Form("raw_%s",fd));
       index_raw++;
