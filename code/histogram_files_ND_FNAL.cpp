@@ -65,8 +65,8 @@ vector<Sel_type> br=
 
 void histogram_files_ND_FNAL()
 {
-  // vector<double> geoeff_cut_threshold = {0.0, 0.005, 0.01, 0.1};
-  vector<double> geoeff_cut_threshold = {0.1, 0.08, 0.06, 0.04, 0.02, 0.01, 0.0};
+  vector<double> geoeff_cut_threshold = {0.1};
+  // vector<double> geoeff_cut_threshold = {0.1, 0.08, 0.06, 0.04, 0.02, 0.01, 0.0};
 
   for (double geoeff_cut:geoeff_cut_threshold)
   {
@@ -136,7 +136,7 @@ void histogram_files_ND_FNAL()
 
       // // only pick center region
       // if (x_pos <= -50 || x_pos >= 50) continue;  // Skip values outside the (-50, 50) range
-      // // cout << "x_pos: " << x_pos << endl;
+      // cout << "x_pos: " << x_pos << endl;
       //
       // cout << "i_entry: " << i << endl;
       // cout << "LepE: " << LepE << ", eP: " << eP << ", ePip: " << ePip << ", ePim: " << ePim << ", ePi0: " << ePi0 << ", eOther: " << eOther << ", nipi0: " << nipi0 << endl;
@@ -206,12 +206,12 @@ void histogram_files_ND_FNAL()
         const char *fd=item.field;
 
         // Create a folder before writting root file
-        // gSystem->mkdir(TString::Format("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_center/%.3f_eff_veto_cut_ND/%s", geoeff_cut,fd), kTRUE); //  means only choose events w/ geoeff >=0
+        // gSystem->mkdir(TString::Format("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN_center/%.3f_eff_veto_cut_ND/%s", geoeff_cut,fd), kTRUE); //  means only choose events w/ geoeff >=0
         // gSystem->mkdir(TString::Format("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_CAF/%.3f_eff_veto_cut_ND/%s", geoeff_cut,fd), kTRUE); //  means only choose events w/ geoeff >=0
         gSystem->mkdir(TString::Format("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN/%.3f_eff_veto_cut_ND/%s", geoeff_cut,fd), kTRUE); //  means only choose events w/ geoeff >=0
 
         if (index<NUM_FIELDS) {
-          // raw_files[index]=new TFile(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_center/%.3f_eff_veto_cut_ND/%s/raw_%s.root",geoeff_cut, fd,fd),"recreate");
+          // raw_files[index]=new TFile(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN_center/%.3f_eff_veto_cut_ND/%s/raw_%s.root",geoeff_cut, fd,fd),"recreate");
           // raw_files[index]=new TFile(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_CAF/%.3f_eff_veto_cut_ND/%s/raw_%s.root",geoeff_cut, fd,fd),"recreate");
           raw_files[index]=new TFile(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN/%.3f_eff_veto_cut_ND/%s/raw_%s.root",geoeff_cut, fd,fd),"recreate");
           TH1D* raw_hist=histograms1.at(index);
@@ -219,14 +219,14 @@ void histogram_files_ND_FNAL()
           raw_files[index]->Close();
         }
 
-        // sel_files[index]=new TFile(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_center/%.3f_eff_veto_cut_ND/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd),"recreate");
+        // sel_files[index]=new TFile(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN_center/%.3f_eff_veto_cut_ND/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd),"recreate");
         // sel_files[index]=new TFile(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_CAF/%.3f_eff_veto_cut_ND/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd),"recreate");
         sel_files[index]=new TFile(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN/%.3f_eff_veto_cut_ND/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd),"recreate");
         TH1D* sel_hist=histograms2.at(index);
         sel_hist->Write();
         sel_files[index]->Close();
 
-        // geo_files[index]=new TFile(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_center/%.3f_eff_veto_cut_ND/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd),"recreate");
+        // geo_files[index]=new TFile(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN_center/%.3f_eff_veto_cut_ND/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd),"recreate");
         // geo_files[index]=new TFile(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_CAF/%.3f_eff_veto_cut_ND/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd),"recreate");
         geo_files[index]=new TFile(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_muonNN/%.3f_eff_veto_cut_ND/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd),"recreate");
         TH1D* geo_hist=histograms3.at(index);
