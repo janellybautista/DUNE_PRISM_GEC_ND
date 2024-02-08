@@ -7,6 +7,9 @@ from uproot import concatenate, exceptions
 from ROOT import std, TFile, TTree
 import numpy as np
 from glob import glob
+from sys import argv
+import sys
+
 import torch
 from muonEffModel import muonEffModel
 from os.path import splitext, basename#, exists
@@ -60,7 +63,10 @@ FV_cut=True
 LAr_position=[-2800.,-1400.,0.]
 # LAr_position=[-2800.,-2575.,-2400.,-2175.,-2000.,-1775.,-1600.,-1375.,-1200.,-975.,-800.,-575.,-400.,-175.,0.]
 vertex_position=[-299.,-292.,-285.,-278.,-271.,-264.,-216.,-168.,-120.,-72.,-24.,24.,72.,120.,168.,216.,264.,271.,278.,285.,292.,299.]
-TreeVars=["ND_OffAxis_Sim_mu_start_v_xyz_LAr", "ND_OffAxis_Sim_mu_start_p_xyz_LAr", "hadron_throw_result_LAr"]
+TreeVars=["ND_OffAxis_Sim_mu_start_v_xyz_LAr", "ND_OffAxis_Sim_mu_start_p_xyz_LAr", "hadron_throw_result_LAr","ND_LepNuAngle","ND_Gen_numu_E","ND_E_vis_true"]
+
+# Read FD CAF
+CAF_files = str(sys.argv[1])
 
 #This is the function where everything happens. Analyse one file at a time, otherwise memory explodes! As f is only 1 file, each file get assigned to a different cpu.
 def processFiles(f):
@@ -96,6 +102,15 @@ def processFiles(f):
     tree.Branch("muon_selected_eff", effs_selected)
     tree.Branch("combined_eff", effs_combined)
 
+    # Add branch from FD CAF
+    # # ND_OffAxis_Sim_mu_start_v_xyz_LAr = []
+    # # ND_OffAxis_Sim_mu_start_p_xyz_LAr = []
+    # # tree.Branch("ND_OffAxis_Sim_mu_start_v_xyz_LAr", ND_OffAxis_Sim_mu_start_v_xyz_LAr)
+    # # tree.Branch("ND_OffAxis_Sim_mu_start_p_xyz_LAr", ND_OffAxis_Sim_mu_start_p_xyz_LAr)
+    # tree.Branch("ND_LepNuAngle", ND_LepNuAngle_a)
+    # tree.Branch("ND_Gen_numu_E", ND_Gen_numu_E_a)
+    # tree.Branch("ND_E_vis_true", ND_E_vis_true_a)
+
     # Event loop
     for i_event in range(len(FD_sim_Results['hadron_throw_result_LAr'])):
         event=FD_sim_Results['hadron_throw_result_LAr'][i_event]
@@ -109,6 +124,14 @@ def processFiles(f):
         effs_contained.clear()
         effs_selected.clear()
         effs_combined.clear()
+
+        # ND_OffAxis_Sim_mu_start_v_xyz_LAr.clear()
+        # ND_OffAxis_Sim_mu_start_p_xyz_LAr.clear()
+        # ND_OffAxis_Sim_mu_start_v_xyz_LAr = FD_sim_Results["ND_OffAxis_Sim_mu_start_v_xyz_LAr"]
+        # # ND_OffAxis_Sim_mu_start_p_xyz_LAr = FD_sim_Results["ND_OffAxis_Sim_mu_start_p_xyz_LAr"]
+        # ND_LepNuAngle_a = FD_sim_Results["ND_LepNuAngle"]
+        # ND_Gen_numu_E_a = FD_sim_Results["ND_Gen_numu_E"]
+        # ND_E_vis_true_a = FD_sim_Results["ND_E_vis_true"]
         #print(cafTree['LepNuAngle'][i_event])
         for det_pos in range(len(event)):
         #for det_pos in [0,14]: #14 is the last LAr position index
@@ -204,14 +227,35 @@ def processFiles(f):
                     translationAngle=np.dot(decayToTranslated, decayToVertex)
                     translationAngle=np.divide(translationAngle, np.multiply(magDecayToVertex,magDecayToTranslated));
                     #for angleval in translationAngle: if angleval<=-1 or angleval>=1: print(i_event, angleval)
-                    translationAngle=np.arccos(translationAngle);
-                    translationAxis=np.cross(decayToTranslated, decayToVertex)
-                    translationAxis=[thisV/np.linalg.norm(thisV) for thisV in translationAxis]
-                    translation_rot_vec=np.multiply(translationAxis, translationAngle[...,None])
-                    decayToTranslated=[thisV/np.linalg.norm(thisV) for thisV in decayToTranslated]
-                    phi_rot_vec=np.multiply(decayToTranslated, throw_phi[...,None])
+                    # translationAngle=np.arccos(translationAngle);
+                    # translationAxis=np.cross(decayToTranslated, decayToVertex)
+                    # translationAxis=[thisV/np.linalg.norm(thisV) for thisV in translationAxis]
+                    # translation_rot_vec=np.multiply(translationAxis, translationAngle[...,None])
+                    # decayToTranslated=[thisV/np.linalg.norm(thisV) for thisV in decayToTranslated]
+                    # phi_rot_vec=np.multiply(decayToTranslated, throw_phi[...,None])
                     # print("decayToTranslated",end="=")
                     # print(decayToTranslated)
+
+                    # Updated(debugged) one
+                    translationAxis = np.cross(decayToTranslated, decayToVertex)
+                    # Calculate the magnitude (norm) of the translation axis
+                    magTranslationAxis = np.linalg.norm(translationAxis)
+                    # Check if magnitude is not zero to avoid division by zero
+                    if magTranslationAxis != 0:
+                        translationAxis /= magTranslationAxis  # Normalize translation axis
+                        translationAngle = np.arccos(translationAngle)  # Assuming translationAngle needs this operation
+                    else:
+                        translationAxis = np.zeros(3)  # Set all components of translationAxis to 0
+                        translationAngle = 0.0  # Reset translationAngle to 0
+                    translation_rot_vec = np.multiply(translationAxis,translationAngle[...,None])  # Element-wise multiplication
+
+                    magdecayToTranslated = np.linalg.norm(decayToTranslated)
+                    if magdecayToTranslated != 0:
+                        decayToTranslated /= magdecayToTranslated
+                    else:
+                        decayToTranslated = np.zeros(3)
+                    phi_rot_vec = np.multiply(decayToTranslated, throw_phi[...,None])
+
 
                     # Get rotation matrices due to:
                     # Vertex translation (which "rotates" the average neutrino direction)
@@ -304,15 +348,16 @@ if __name__=="__main__":
     net=muonEffModel()
     net.load_state_dict(torch.load("./muonEff30.nn",map_location=torch.device('cpu')))
     net.eval()
-    hadron_file=str(sys.argv[1])
-    allFiles=glob(hadron_file)
-    #if len(allFiles)<NUM_PROCS:
-        #print("Fewer files than processes, setting NUM_PROC to {0}".format(len(allFiles)))
-        #NUM_PROCS=len(allFiles)
-    #filesPerProc=int(np.ceil(float(len(allFiles))/NUM_PROCS))
-    #print(filesPerProc, NUM_PROCS)
-
-    # pool=Pool(NUM_PROCS) #don't use multiprocessing for debugging
-    # pool.map(processFiles, allFiles)
-    for file in allFiles: processFiles(file)
-    # processFiles(hadron_file)
+    # hadron_file=str(sys.argv[1])
+    # allFiles=glob(hadron_file)
+    # #if len(allFiles)<NUM_PROCS:
+    #     #print("Fewer files than processes, setting NUM_PROC to {0}".format(len(allFiles)))
+    #     #NUM_PROCS=len(allFiles)
+    # #filesPerProc=int(np.ceil(float(len(allFiles))/NUM_PROCS))
+    # #print(filesPerProc, NUM_PROCS)
+    #
+    # # pool=Pool(NUM_PROCS) #don't use multiprocessing for debugging
+    # # pool.map(processFiles, allFiles)
+    # for file in allFiles: processFiles(file)
+    # # processFiles(hadron_file)
+    processFiles(CAF_files)

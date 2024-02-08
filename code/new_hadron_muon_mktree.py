@@ -282,12 +282,33 @@ def processFiles(f):
                 translationAngle = np.dot(decayToTranslated, decayToVertex)
                 translationAngle = np.divide(translationAngle, np.multiply(magDecayToVertex,magDecayToTranslated));
                 #for angleval in translationAngle:if angleval<=-1 or angleval>=1: print(i_event, angleval)
-                translationAngle = np.arccos(translationAngle);
-                translationAxis = np.cross(decayToTranslated, decayToVertex)
-                translationAxis = [ thisV/np.linalg.norm(thisV) for thisV in translationAxis ]
-                translation_rot_vec = np.multiply(translationAxis, translationAngle[...,None])
+                # Old translation algorithm before debug
+                # translationAngle = np.arccos(translationAngle);
+                # translationAxis = np.cross(decayToTranslated, decayToVertex)
+                # translationAxis = [ thisV/np.linalg.norm(thisV) for thisV in translationAxis ]
+                # translation_rot_vec = np.multiply(translationAxis, translationAngle[...,None])
 
-                decayToTranslated = [ thisV/np.linalg.norm(thisV) for thisV in decayToTranslated ]
+                # decayToTranslated = [ thisV/np.linalg.norm(thisV) for thisV in decayToTranslated ]
+                # phi_rot_vec = np.multiply(decayToTranslated, throw_phi[...,None])
+
+                # Updated(debugged) one
+                translationAxis = np.cross(decayToTranslated, decayToVertex)
+                # Calculate the magnitude (norm) of the translation axis
+                magTranslationAxis = np.linalg.norm(translationAxis)
+                # Check if magnitude is not zero to avoid division by zero
+                if magTranslationAxis != 0:
+                    translationAxis /= magTranslationAxis  # Normalize translation axis
+                    translationAngle = np.arccos(translationAngle)  # Assuming translationAngle needs this operation
+                else:
+                    translationAxis = np.zeros(3)  # Set all components of translationAxis to 0
+                    translationAngle = 0.0  # Reset translationAngle to 0
+                translation_rot_vec = np.multiply(translationAxis,translationAngle[...,None])  # Element-wise multiplication
+                
+                magdecayToTranslated = np.linalg.norm(decayToTranslated)
+                if magdecayToTranslated != 0:
+                    decayToTranslated /= magdecayToTranslated
+                else:
+                    decayToTranslated = np.zeros(3)
                 phi_rot_vec = np.multiply(decayToTranslated, throw_phi[...,None])
 
                 this_px = CAF["LepMomX"][i_event]
@@ -378,13 +399,13 @@ def processFiles(f):
         inputfeatures = torch.as_tensor(inputfeatures).type(torch.FloatTensor)
         # Evaluate neural network
         with torch.no_grad() :
-            netOut = net(inputfeatures)
-            netOut = torch.nn.functional.softmax(netOut, dim=1).detach().numpy()
+            netOut_muon = net(inputfeatures)
+            netOut_muon = torch.nn.functional.softmax(netOut_muon, dim=1).detach().numpy()
 
         # Get contained probability for this ND event
-        nd_lep_contained_prob_nonecc = np.array(netOut[:,0], dtype = float)
+        nd_lep_contained_prob_nonecc = np.array(netOut_muon[:,0], dtype = float)
         # Get tracker probability
-        nd_lep_tracker_prob_nonecc = np.array(netOut[:,1], dtype = float)
+        nd_lep_tracker_prob_nonecc = np.array(netOut_muon[:,1], dtype = float)
         print ("--- nn prob. contained: ", nd_lep_contained_prob_nonecc, ", tracker: ", nd_lep_tracker_prob_nonecc)
 
         sel_combined = np.multiply(np.add(nd_lep_tracker_prob_nonecc, nd_lep_contained_prob_nonecc), sel)
