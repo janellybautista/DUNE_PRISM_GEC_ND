@@ -77,12 +77,17 @@ fi
 echo "Finished checking outdir: $OUTDIR"
 
 myinfile=""
+basefile=""
+inputfile=""
 # PROCESS starts from 0, 1, ... N-1
 (( LINE_N = ${PROCESS} + 1 ))
 
 # Loop over file list in txt file
 for ifile in $(cat ${INPUT_TAR_DIR_LOCAL}/FDCAFs.txt | head -${LINE_N} | tail -1); do
   myinfile="${myinfile} ${ifile}"
+  basefile=$(basename $ifile)
+  inputfile="${basefile%.root}"
+  echo "Input file without .root extension: $inputfile"
 done
 
 echo "Got xrootd url: $myinfile"
@@ -110,7 +115,8 @@ echo "ls -l _CONDOR_JOB_IWD"
 ls -l ${_CONDOR_JOB_IWD}
 
 # Unique name in case we send multiple jobs.
-OUTFILE=FDGeoEff_${CLUSTER}_${PROCESS}.root
+# OUTFILE=FDGeoEff_${CLUSTER}_${PROCESS}.root
+OUTFILE=${inputfile}_Eff.root
 
 if [ -f Output_FDGeoEff.root ]; then
 
