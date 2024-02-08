@@ -46,7 +46,7 @@ cd DUNE_PRISM_GEC_ND/code
 python3 new_hadron_muon_mktree.py /pnfs/dune/persistent/physicsgroups/dunelbl/abooth/PRISM/Production/Simulation/ND_CAFMaker/v7/CAF/0mgsimple/101/FHC.1101999.CAF.root
 ```
 
-#### 3. Submit grid job 
+#### 3.1 Submit grid job (Geometric efficiency for ND events at ND)
 ```
 # Make a tarball to send everything you need to run your program on grid node
 cd DUNE_PRISM_GEC_ND/code
@@ -75,6 +75,19 @@ The job script (```run_NDcombEff.sh```) can be adjusted to run more than one fil
 (( LINE_N = ${PROCESS} + 1 ))
 
 for ifile in $(cat ${INPUT_TAR_DIR_LOCAL}/NDCAFs.txt | head -${LINE_N} | tail -1); do
+```
+#### 3.2 Submit grid job (Geometric efficiency for FD events at ND)
+```
+# Make a tarball to send everything you need to run your program on grid node
+cd DUNE_PRISM_GEC_ND/code
+# Write list of files into a txt file, remember to change the foldername before submitting job
+ls -d "/pnfs/dune/persistent/users/flynnguo/FDGeoEffinND/<FDGeoEff_JOBID>"/* | sed "s\/pnfs\root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr\g" > FDCAFs.txt
+# For example:
+ls -d "/pnfs/dune/persistent/users/flynnguo/FDGeoEffinND/FDGeoEff_2811722"/* | sed "s\/pnfs\root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr\g" > FDCAFs.txt
+# Now make a tarball
+tar -czvf FD_work.tar.gz setup_NDcombEff.sh FD_maketree.py muonEff30.nn muonEffModel.py FDCAFs.txt
+# You can use ```wc -l FDCAFs.txt``` to check the number of files in txt file
+jobsub_submit -G dune -N 8057 --memory=5GB --disk=10GB --expected-lifetime=8h --cpu=1 --resource-provides=usage_model=DEDICATED,OPPORTUNISTIC,OFFSITE --tar_file_name=dropbox:///dune/app/users/flynnguo/DUNE_PRISM_GEC_ND/code/FD_work.tar.gz --use-cvmfs-dropbox -l '+SingularityImage=\"/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-wn-sl7:latest\"' --append_condor_requirements='(TARGET.HAS_Singularity==true&&TARGET.HAS_CVMFS_dune_opensciencegrid_org==true&&TARGET.HAS_CVMFS_larsoft_opensciencegrid_org==true&&TARGET.CVMFS_dune_opensciencegrid_org_REVISION>=1105&&TARGET.HAS_CVMFS_fifeuser1_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser2_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser3_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser4_opensciencegrid_org==true)' file:///dune/app/users/flynnguo/DUNE_PRISM_GEC_ND/code/run_FDcombEff.sh
 ```
 
 ## NNhome machine
