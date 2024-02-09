@@ -67,6 +67,7 @@ jobsub_submit -G dune -N 9980 --memory=5GB --disk=10GB --expected-lifetime=1.5h 
 
 To query the job status: ```jobsub_q <usrname> -G dune```. [See job details](https://fifemon.fnal.gov/monitor/d/000000115/job-cluster-summary?orgId=1&var-cluster=73871417&var-schedd=jobsub02.fnal.gov)  
 To remove a job status: ```condor_rm <usrname> -G dune```
+To remove a specific job: ```jobsub_rm --jobid=<jobid>@jobsub<xx>.fnal.gov```
 
 If your job gets held (HoldReasonCode 26), subcode 1 is memory, 2 is disk, 4 is too many starts (max of 10 attempts to run a job), 8 is run time. You can can also get HoldReasonCode 34 and subcode 0, which is also memory.
 
