@@ -354,13 +354,16 @@ def processFiles(f):
 
         # This used to be used for matplotlib, but I don't use that for histogram-making.
         fv = np.logical_and(CAF["inFV"], CAF["isCC"])
-        numu = np.absolute(CAF["LepPDG"]) == 13
-        fv = np.logical_and(fv, numu)
+        # Choose muon
+        # mu = np.absolute(CAF["LepPDG"]) == 13
+        mu = CAF["LepPDG"] == 13
+        fv = np.logical_and(fv, mu)
         no_weird_events = np.absolute(np.sum(CAF["muon_endpoint"], axis = 1)) > 0.
         fv = np.logical_and(fv, no_weird_events)
 
         had_containment = CAF["Ehad_veto"] < 30
         sel = np.logical_and(had_containment, fv)
+
         # sel_tracker = np.logical_and(CAF['muon_tracker'] > 0, fv)
         # isContained_vec = np.vectorize(isContained)
         # sel_contained = np.logical_and(isContained_vec(CAF["muon_endpoint"][:,0], CAF["muon_endpoint"][:,1], CAF["muon_endpoint"][:,2]), fv)
