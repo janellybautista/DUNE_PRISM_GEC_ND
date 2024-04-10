@@ -2,7 +2,7 @@
 DUNE-PRISM: GEC from muon side
 > - ND CAF Maker: https://internal.dunescience.org/doxygen/ND__CAFMaker_2dumpTree_8py_source.html
 > - Some are copied from: [FNAL instruction](https://github.com/FlynnYGUO/NeutrinoPhysics/blob/main/GEC/BaronCodeOutdated/NDGEC.md) and [NNhome instruction](https://github.com/FlynnYGUO/NeutrinoPhysics/blob/main/GEC/BaronNewCode/Instructions.md)
-> [DUNE Computing Training](https://dune.github.io/computing-basics/index.html)
+> [DUNE Computing Training](https://dune.github.io/computing-basics/index.html)  
 > [DUNE: SL7 to ALMA9](https://wiki.dunescience.org/wiki/SL7_to_Alma9_conversion)
 ## FNAL machine
 ### 0. Setup
