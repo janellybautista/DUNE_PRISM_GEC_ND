@@ -2,7 +2,8 @@
 DUNE-PRISM: GEC from muon side
 > - ND CAF Maker: https://internal.dunescience.org/doxygen/ND__CAFMaker_2dumpTree_8py_source.html
 > - Some are copied from: [FNAL instruction](https://github.com/FlynnYGUO/NeutrinoPhysics/blob/main/GEC/BaronCodeOutdated/NDGEC.md) and [NNhome instruction](https://github.com/FlynnYGUO/NeutrinoPhysics/blob/main/GEC/BaronNewCode/Instructions.md)
-> [DUNE Computing Training](https://dune.github.io/computing-basics/index.html)
+> - [DUNE Computing Training](https://dune.github.io/computing-basics/index.html)  
+> - [DUNE: SL7 to ALMA9](https://wiki.dunescience.org/wiki/SL7_to_Alma9_conversion)
 ## FNAL machine
 ### 0. Setup
 #### 1. Log in & DUNE FNAL machines (dunegpvm*) environment setup:
@@ -16,7 +17,7 @@ Environment setup (only do it once):
 cd /exp/dune/app/users/flynnguo                                             # Replace with your username for all commands below
 git clone https://github.com/FlynnYGUO/DUNE_PRISM_GEC_ND.git
 # This allows using pip
-source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh 
 setup dunetpc v09_41_00_02 -q e20:prof
 pip install --target=/exp/dune/app/users/flynnguo/lib/python3.9/site-packages uproot
 pip install --target=/exp/dune/app/users/flynnguo/lib/python3.9/site-packages torch
@@ -25,7 +26,7 @@ pip install --target=/exp/dune/app/users/flynnguo/lib/python3.9/site-packages sc
 Next time once you log in to the FNAL machine, do the following (do it every time you log in):
 ```
 cd /exp/dune/app/users/flynnguo
-source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh 
 setup dunetpc v09_41_00_02 -q e20:prof
 export PYTHONPATH=/exp/dune/app/users/flynnguo/lib/python3.9/site-packages:$PYTHONPATH
 ```
