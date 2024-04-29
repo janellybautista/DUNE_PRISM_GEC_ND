@@ -30,7 +30,7 @@ source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 setup dunetpc v09_41_00_02 -q e20:prof
 export PYTHONPATH=/exp/dune/app/users/flynnguo/lib/python3.9/site-packages:$PYTHONPATH
 ```
-It would be better if you can source the new version of ROOT:
+You can also source the new version of ROOT:
 ```
 source /cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.24.08/x86_64-centos7-gcc48-opt/bin/thisroot.sh
 ```
@@ -38,7 +38,8 @@ Files I/O on DUNE machines
 Input ND CAF files are here: ```/pnfs/dune/persistent/physicsgroups/dunelbl/abooth/PRISM/Production/Simulation/ND_CAFMaker/v7/CAF```
 Output files from grid jobs are written to the scratch area ```/pnfs/dune/scratch/users/<your username>```.
 
-Please avoid reading from, copying from, or writing massive amount of files directly to the pnfs area ```/pnfs/dune/persistent```, this will slow down the file system. Refer to [this wiki](https://mu2ewiki.fnal.gov/wiki/DataTransfer) for good practices on data transfer.
+Please avoid reading from, copying from, or writing massive amount of files directly to the pnfs area ```/pnfs/dune/persistent```, this will slow down the file system. Refer to [this wiki](https://mu2ewiki.fnal.gov/wiki/DataTransfer) for good practices on data transfer.  
+> To transfer files, highly recommended to tar all files first ```tar -czvf <Filename.tar.gz> all_files``` and copy the .tar.gz to your directory then untar it ```tar -xvzf``` instead of copying individual root files.
 
 #### 2. Interactive run
 If you want to run code interactively on ```dunegpvm*``` for debugging, follow instruction in this section.
