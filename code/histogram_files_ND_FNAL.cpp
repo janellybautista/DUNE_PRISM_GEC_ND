@@ -51,8 +51,8 @@ Para pr[]= //position is in units of cm, momentum is in units of GeV/c, angle is
   {"LepMomTot", 0., 10.,&TotalMom},
   {"cos_LepNuAngle", 0., 1.,&cos_angle},
   {"Ev", 0., 10., &ev},
-  // {"E_vis_true", 0., 10., &E_vis_true}
-  {"W", 0., 10., &hadW}
+  {"E_vis_true", 0., 10., &E_vis_true}
+  // {"W", 0., 10., &hadW}
 };
 
 vector<Sel_type> br=
@@ -66,9 +66,9 @@ vector<Sel_type> br=
 
 void histogram_files_ND_FNAL()
 {
-  vector<double> geoeff_cut_threshold = {0.04};
-  // vector<double> geoeff_cut_threshold = {0.1, 0.04, 0.01, 0.0};
-  // vector<double> geoeff_cut_threshold = {0.1, 0.08, 0.06, 0.04, 0.02, 0.01, 0.0};
+  // vector<double> geoeff_cut_threshold = {0.04,0.1,0.2,0.3};
+  vector<double> geoeff_cut_threshold = {0.04, 0.1, 0.2};
+  // vector<double> geoeff_cut_threshold = {0.3, 0.25, 0.2, 0.15, 0.1, 0.08, 0.04, 0.01, 0.0};
 
   for (double geoeff_cut:geoeff_cut_threshold)
   {
@@ -98,12 +98,12 @@ void histogram_files_ND_FNAL()
         histograms2.push_back(new TH1D(Form("selection-cut_%s_%s", dt, fd), Form("selected %s %s", dt, fd), 200, l, h));
         histograms3.push_back(new TH1D(Form("geo-corrected_%s_%s", dt, fd), Form("geo corrected %s %s", dt, fd), 200, l, h));
       }
-      first_pass=1;
+      first_pass+=1;
     }
 
     // Generate the required root files
     // Input FDroot file
-    TString FileIn = "/pnfs/dune/persistent/users/flynnguo/NDeff_muon/0mgsimple/NDGeoEff_54131355.root";
+    TString FileIn = "/pnfs/dune/persistent/users/flynnguo/NDeff_muon/0mgsimple/NDGeoEff_0mgsimple.root";
     // Read
     TChain *event_data = new TChain("event_data");
     event_data->Add(FileIn.Data());
@@ -131,14 +131,18 @@ void histogram_files_ND_FNAL()
     event_data->SetBranchAddress("Ehad_veto", &Ehad_veto);
 
     // Fill plots
-    // for (int i=0;i<20;i++) {
-    for (int i=0;i<nentries;i++) {
+
+      int veto_number = 0;
+    // for (int i=0;i<6482016;i++)
+    for (int i=0;i<nentries;i++)
+    {
 
       event_data->GetEntry(i);
 
       // only pick center region
-      // if (x_pos <= -50 || x_pos >= 50) continue;  // Skip values outside the (-50, 50) range
-      // cout << "x_pos: " << x_pos << endl;
+      // if ((abs(x_pos) > 26 || abs(x_pos) < 22) && (abs(x_pos) < 70 || abs(x_pos) >74)) continue;  // Skip values outside the (-50, 50) range
+      // if (abs(x_pos) > 50) continue;  // Skip values outside the (-50, 50) range
+      cout <<  "i_entry: " << i  << ", x_pos: " << x_pos << endl;
       //
       // cout << "i_entry: " << i << endl;
       // cout << "LepE: " << LepE << ", eP: " << eP << ", ePip: " << ePip << ", ePim: " << ePim << ", ePi0: " << ePi0 << ", eOther: " << eOther << ", nipi0: " << nipi0 << endl;
@@ -179,45 +183,60 @@ void histogram_files_ND_FNAL()
         const char* dt=sel.sel_name;
         // cout << "br n: " << br_n << ",name: " << dt << endl;
         // if (Ehad_veto > 30) cout << "i: " << i << ", Ehad_veto > 30" << endl;
+        int pr_n =0;
+
+
         for (auto item:pr)
         {
           const char *fd=item.field;
           double geo_eff=*sel.eff_value;
+          double l=item.l;
+          double h=item.h;
+
+          pr_n++;
+
 
           TH1D* hist1;
           if (n<NUM_FIELDS) hist1=histograms1.at(n);
           TH1D* hist2=histograms2.at(n);
           TH1D* hist3=histograms3.at(n);
-          if (n<NUM_FIELDS) hist1->Fill(*item.field_value); // Raw
+
+
+          if (n<NUM_FIELDS && *item.field_value<h) hist1->Fill(*item.field_value, 1); // Raw
           n++;
 
-          if (geo_eff < geoeff_cut) continue;
-            
-          if (br_n==3&& Ehad_veto > 30) {
-            cout << "i: " << i << ", br n: " << br_n << ",name: " << dt << ", geoeff: " << geo_eff << ", Ehad_veto: " << Ehad_veto<<endl;
-            continue;
-          }
+          // if (br_n==3 && Ehad_veto > 30 ) {
+          //   // if (pr_n ==3 && *item.field_value<1)
+          //   // {
+          //     // cout << "i: " << i << ", geoeff_cut: " << geoeff_cut << ", geo_eff: " << geo_eff << ",name: " << dt << ", pr_name: " << fd << ", value: " << *item.field_value << ", Ehad_veto: " << Ehad_veto << ", vtx_x: " << x_pos<< endl;
+          //   // }
+          //   cout << "i: " << i << ", geoeff_cut: " << geoeff_cut << ", geo_eff: " << geo_eff << ",name: " << dt << ", Ehad_veto: " << Ehad_veto << ", vtx_x: " << x_pos<< endl;
+          //
+          //   veto_number ++;
+          //   continue;
+          // }
 
-          if(geoeff_cut != 0)
+          if( geo_eff >= geoeff_cut && *item.field_value < h)
           {
-            hist2->Fill(*item.field_value, *sel.sel_value); // Sel
-            hist3->Fill(*item.field_value, *sel.sel_value/geo_eff); // Geo-corrected
-            if (br_n==3&& Ehad_veto > 30) {
-              cout << "i: " << i << ", br n: " << br_n << ",name: " << dt << ", geoeff: " << geo_eff << ", Ehad_veto: " << Ehad_veto<<endl;
+            if(geoeff_cut != 0)
+            {
+              hist2->Fill(*item.field_value, *sel.sel_value); // Sel
+              hist3->Fill(*item.field_value, *sel.sel_value/geo_eff); // Geo-corrected
+            }
+            else
+            {
+              hist2->Fill(*item.field_value, *sel.sel_value); // Sel
+              hist3->Fill(*item.field_value, *sel.sel_value); // Geo-corrected
             }
           }
-          else
-          {
-            hist2->Fill(*item.field_value, *sel.sel_value); // Sel
-            hist3->Fill(*item.field_value, *sel.sel_value); // Geo-corrected
-          }
-
 
         }// end pr loop
-
         br_n++;
       }// end br loop
+
+
     }
+      cout << " veto_number: " << veto_number << ", i: " << nentries << ", ratio: " << veto_number*1.0/nentries << endl;
 
 
     TFile *raw_files[NUM_FIELDS];
@@ -230,21 +249,21 @@ void histogram_files_ND_FNAL()
         const char *fd=item.field;
 
         // Create a folder before writting root file
-        gSystem->mkdir(TString::Format("/exp/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_NDlepPDG13_whadNDvetocut/%.3f_eff_veto_cut_ND/%s", geoeff_cut,fd), kTRUE); //  means only choose events w/ geoeff >=0
+        gSystem->mkdir(TString::Format("/exp/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_hadronselect_all_0mgsimple_woEhadcut/%.3f_eff_veto_cut_ND/%s", geoeff_cut,fd), kTRUE); //  means only choose events w/ geoeff >=0
 
         if (index<NUM_FIELDS) {
-          raw_files[index]=new TFile(Form("/exp/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_NDlepPDG13_whadNDvetocut/%.3f_eff_veto_cut_ND/%s/raw_%s.root",geoeff_cut, fd,fd),"recreate");
+          raw_files[index]=new TFile(Form("/exp/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_hadronselect_all_0mgsimple_woEhadcut/%.3f_eff_veto_cut_ND/%s/raw_%s.root",geoeff_cut, fd,fd),"recreate");
           TH1D* raw_hist=histograms1.at(index);
           raw_hist->Write();
           raw_files[index]->Close();
         }
 
-        sel_files[index]=new TFile(Form("/exp/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_NDlepPDG13_whadNDvetocut/%.3f_eff_veto_cut_ND/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd),"recreate");
+        sel_files[index]=new TFile(Form("/exp/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_hadronselect_all_0mgsimple_woEhadcut/%.3f_eff_veto_cut_ND/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd),"recreate");
         TH1D* sel_hist=histograms2.at(index);
         sel_hist->Write();
         sel_files[index]->Close();
 
-        geo_files[index]=new TFile(Form("/exp/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_NDlepPDG13_whadNDvetocut/%.3f_eff_veto_cut_ND/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd),"recreate");
+        geo_files[index]=new TFile(Form("/exp/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_hadronselect_all_0mgsimple_woEhadcut/%.3f_eff_veto_cut_ND/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd),"recreate");
         TH1D* geo_hist=histograms3.at(index);
         geo_hist->Write();
         geo_files[index]->Close();

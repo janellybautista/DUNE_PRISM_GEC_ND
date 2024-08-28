@@ -18,16 +18,38 @@ using namespace std;
 
 vector<vector<vector<double>>>* xyz_pos=nullptr;
 vector<vector<vector<double>>>* xyz_mom=nullptr;
+vector<vector<float>>* vetoEnergyFDatND=nullptr; // Veto E of FD events at ND <ND_LAr_pos < vtx_pos <vetoEnergyFDatND> > >
+vector<vector<float>>* outEnergyFDatND=nullptr; // out E of FD events at ND <ND_LAr_pos < vtx_pos <outEnergyFDatND> > >
+vector<vector<float>>* totEnergyFDatND=nullptr; // out E of FD events at ND <ND_LAr_pos < vtx_pos <totEnergyFDatND> > >
+
 double lepnuangle=0.;
 double numu_e=0;
 double e_vis_true=0;
+double hadW = 0;
 double vetoEnergyFD=0;
+float vetoEnergyFDatND_f = 0;
+float outEnergyFDatND_f = 0;
+float totEnergyFDatND_f = 0;
 
-const int NUM_VTX=22;
+const int NUM_VTX=72;
 const int NUM_LAR_DTR=3; // number of on/off axis position of LAr
 // double LAr_position[NUM_LAR_DTR]={-2800.,-2575.,-2400.,-2175.,-2000.,-1775.,-1600.,-1375.,-1200.,-975.,-800.,-575.,-400.,-175.,0.};
 double LAr_position[NUM_LAR_DTR]={-2800.,-1400.,0.};
-double vertex_position[NUM_VTX]={-299.,-292.,-285.,-278.,-271.,-264.,-216.,-168.,-120.,-72.,-24.,24.,72.,120.,168.,216.,264.,271.,278.,285.,292.,299.};
+// double vertex_position[NUM_VTX]={-299.,-292.,-285.,-278.,-271.,-264.,-216.,-168.,-120.,-72.,-24.,24.,72.,120.,168.,216.,264.,271.,278.,285.,292.,299.};
+double vertex_position[NUM_VTX] = {
+        -298.55, -291.55, -284.55, -277.55, -270.55, -263.55,
+        -246.95, -239.95, -232.95, -225.95, -218.95, -211.95,
+        -196.45, -189.45, -182.45, -175.45, -168.45, -161.45,
+        -144.85, -137.85, -130.85, -123.85, -116.85, -109.85,
+        -94.35, -87.35, -80.35, -73.35, -66.35, -59.35,
+        -42.75, -35.75, -28.75, -21.75, -14.75, -7.75,
+        7.75, 14.75, 21.75, 28.75, 35.75, 42.75,
+        59.35, 66.35, 73.35, 80.35, 87.35, 94.35,
+        109.85, 116.85, 123.85, 130.85, 137.85, 144.85,
+        161.45, 168.45, 175.45, 182.45, 189.45, 196.45,
+        211.95, 218.95, 225.95, 232.95, 239.95, 246.95,
+        263.55, 270.55, 277.55, 284.55, 291.55, 298.55
+    };
 double total_detected[5][NUM_LAR_DTR][NUM_VTX]={};
 
 struct Para
@@ -44,6 +66,7 @@ Para pr[]= //position is in units of cm, momentum is in units of GeV/c, angle is
   {"cos_LepNuAngle"," ", 0., 1.},
   {"Ev", "GeV",0., 10.},// {"ND_Gen_numu_E", 0., 10.},
   {"E_vis_true", "GeV",0., 10.}// {"ND_E_vis_true", 0., 10.}
+  // {"W", "GeV", 0., 10.}
 };
 
 struct sel_type
@@ -81,7 +104,11 @@ void populate_histograms_FD(char* eff,char* caf,vector<vector<TH1D*>>& hists1,ve
   thing->SetBranchAddress("ND_LepNuAngle", &lepnuangle);
   thing->SetBranchAddress("ND_Gen_numu_E", &numu_e);
   thing->SetBranchAddress("ND_E_vis_true", &e_vis_true);
+  // thing->SetBranchAddress("ND_W", &hadW);
   thing->SetBranchAddress("vetoEnergyFD", &vetoEnergyFD);
+  thing->SetBranchAddress("vetoEnergyFDatND", &vetoEnergyFDatND);
+  thing->SetBranchAddress("outEnergyFDatND", &outEnergyFDatND);
+  thing->SetBranchAddress("totEnergyFDatND", &totEnergyFDatND);
 
   Long64_t nentries1=event_data->GetEntries();
   Long64_t nentries2=thing->GetEntries();
@@ -98,8 +125,6 @@ void populate_histograms_FD(char* eff,char* caf,vector<vector<TH1D*>>& hists1,ve
     int k=0;
     for (Para item:pr) {
       double var_type=0.0;
-      // if (k==7) {var_type=numu_e;}
-      // if (k==8) {var_type=e_vis_true;}
 
       for (unsigned long vtx_pos=0;vtx_pos<NUM_VTX;vtx_pos++) {
 	      int n=0;
@@ -108,6 +133,8 @@ void populate_histograms_FD(char* eff,char* caf,vector<vector<TH1D*>>& hists1,ve
 
           const char* dt=sel.sel_name;
           const char* fd=item.field;
+          double lowerbound=item.l;
+          double upperbound=item.h;
 
           TH1D* hist1=hists1[n][k];
           TH1D* hist2=hists2[n][k];
@@ -115,42 +142,78 @@ void populate_histograms_FD(char* eff,char* caf,vector<vector<TH1D*>>& hists1,ve
           // cout << "k: " << k << ", n: " << n << ", vtx_pos: " << vtx_pos << ", pr name: " << fd << ", br name: " << dt << endl;
 
           n++;
-          if (vtx_pos==0||vtx_pos==1||vtx_pos==2||vtx_pos==4||vtx_pos==5||vtx_pos==16||vtx_pos==17||vtx_pos==19||vtx_pos==20||vtx_pos==21) continue;
-
-          // only pick center region: vtx_pos at -24cm and 24cm
+          // if (vtx_pos==0||vtx_pos==1||vtx_pos==2||vtx_pos==4||vtx_pos==5||vtx_pos==16||vtx_pos==17||vtx_pos==19||vtx_pos==20||vtx_pos==21) continue;
+          //
+          // // only pick center region: vtx_pos at -24cm and 24cm
           // if (vtx_pos != 10 && vtx_pos != 11) continue;
-          // cout << "vtx_pos: " << vtx_pos << endl;
+          // if (abs(vertex_position[vtx_pos])>50) continue;
+          // cout << "vtx_pos: " << vertex_position[vtx_pos] << endl;
 
           if (k==0) var_type=sqrt(pow((*xyz_mom)[lar_pos][vtx_pos][0],2)+pow((*xyz_mom)[lar_pos][vtx_pos][1],2)+pow((*xyz_mom)[lar_pos][vtx_pos][2],2));
           else if (k==1) var_type=cos(lepnuangle);
           else if (k==2) var_type=numu_e;
           else if (k==3) var_type=e_vis_true;
+          // else if (k==3) var_type=hadW;
 
           br_n++;
 
           vector<vector<double>>* eff_value=sel.eff_value;
           vector<vector<double>>& eff_value2=*eff_value;
+
+          vetoEnergyFDatND_f = (*vetoEnergyFDatND)[lar_pos][vtx_pos];
+          outEnergyFDatND_f = (*outEnergyFDatND)[lar_pos][vtx_pos];
+          totEnergyFDatND_f = (*totEnergyFDatND)[lar_pos][vtx_pos];
+
           double geo_eff=eff_value2[lar_pos][vtx_pos];
           if (geo_eff>1.) {cout<<"eff>1 !!! efficiency of event "<<i<<" at position "<<LAr_position[lar_pos]<<", "<<vertex_position[vtx_pos]<<" is "<<geo_eff<<endl;}
           // else {cout<<"efficiency of event "<<i<<" at LAr position: "<<LAr_position[lar_pos]<<", vtx: "<<vertex_position[vtx_pos]<<" is "<<geo_eff<<endl;}
           // cout << "br_n: "<< br_n <<", br name: " << dt << ",vetoEnergyFD: " << vetoEnergyFD << endl;
 
+          // Get rid of the overflow
+          if (var_type > upperbound) continue;
           // else{cout << "br name: " << dt << ",vetoEnergyFD: " << vetoEnergyFD << endl;}
+
+
+          // if (abs(vertex_position[vtx_pos])<250)
+          // {
+          //   hist1->Fill(var_type); // red: raw
+          // }else
+          // {
+          //   hist1->Fill(var_type, (1./6)); // red: raw
+          // }
+
+          // hist1->Fill(var_type); // red: raw
+
+          // Add FDveto cut for selected hadrons
+          // if (br_n==4 && vetoEnergyFD >30){
+          //   // cout << "br name: " << dt << ",vetoEnergyFD: " << vetoEnergyFD << endl;
+          //   continue;
+          // }
+
+          // if(outEnergyFDatND_f!=0) continue;
+          // Fill after FD veto cut
+
 
           hist1->Fill(var_type); // red: raw
 
-          if (br_n==4 && vetoEnergyFD >30){
-            cout << "br name: " << dt << ",vetoEnergyFD: " << vetoEnergyFD << endl;
-            continue;
-          }
 
-          if (geo_eff<geoeff_cut) {
-            continue;
-          } else {
-            hist2->Fill(var_type, geo_eff); // green: selected
+          if( geo_eff >= geoeff_cut)
+          {
+            // if(br_n==4)
+            // {
+            //   // if(outEnergyFDatND_f!=0) continue;
+            //   // cout << "br name: " << dt << ",vetoEnergyFDatND: " << vetoEnergyFDatND_f << endl;
+            //   if (vetoEnergyFDatND_f < 30) hist2->Fill(var_type,geo_eff); // green: mockND
+            //   // if(outEnergyFDatND_f/totEnergyFDatND_f>0.05) continue;
+            //   if (vetoEnergyFDatND_f < 30) hist3->Fill(var_type,1./geo_eff); // blue: target
+            // }else if(br_n!=4)
+            // {
+            //   hist2->Fill(var_type, geo_eff); // green: mockND
+            //   hist3->Fill(var_type); // blue: target
+            // }
+            hist2->Fill(var_type, geo_eff); // green: mockND
             hist3->Fill(var_type); // blue: target
           }
-
 
         }// end br loop
       } // end vtx_pos loop
@@ -210,14 +273,13 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
 
 
 
-    for (int j=0; j<3500; j++)
-    // for (int j=0; j<80; j++)
+    // for (int j=0; j<100; j++)
+    for (int j=0; j<8000; j++)
     {
       memset(eff, 0, 9999); // clear array each time
       memset(caf, 0, 9999);
-      // sprintf(eff, "/pnfs/dune/persistent/users/flynnguo/NDeff_FDhadron/FDGeoEff_2811722_Eff/FDGeoEff_2811722_%d_Eff.root", j);
-      sprintf(eff, "/pnfs/dune/persistent/users/flynnguo/NDeff_FDhadron/FDGeoEff_52679447_new/FDGeoEff_52679447_%d_Eff.root", j);
-      sprintf(caf, "/pnfs/dune/persistent/users/flynnguo/FDGeoEffinND/FDGeoEff_52679447/FDGeoEff_52679447_%d.root", j);
+      sprintf(eff, "/pnfs/dune/persistent/users/flynnguo/NDeff_FDhadron/FDGeoEff_12749829/FDGeoEff_12749829_%d_Eff.root", j);
+      sprintf(caf, "/pnfs/dune/persistent/users/flynnguo/FDGeoEffinND/FDGeoEff_12749829/FDGeoEff_12749829_%d.root", j);
 
       std::cout << "geoeff_cut: " << geoeff_cut << ", j: " << j << ", eff: " << eff << ", caf:" << caf<< std::endl;
 
@@ -262,11 +324,11 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
       {
         const char *fd=item.field;
 
-        sprintf(sel_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_NDnew14/%0.3f_eff_veto_cut_ND/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd);
+        sprintf(sel_path,"/exp/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_hadronselect_all_0mgsimple_woEhadcut/%.3f_eff_veto_cut_ND/%s/selection-cut_%s_%s.root",geoeff_cut,fd,dt,fd);
         sel_files[index]=new TFile(sel_path, "read");
         sel_histograms[index]=(TH1D*)sel_files[index]->Get(Form("selection-cut_%s_%s",dt,fd));
 
-        sprintf(geo_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_NDnew14/%0.3f_eff_veto_cut_ND/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd);
+        sprintf(geo_path,"/exp/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_hadronselect_all_0mgsimple_woEhadcut/%.3f_eff_veto_cut_ND/%s/geo-corrected_%s_%s.root",geoeff_cut,fd,dt,fd);
         geo_files[index]=new TFile(geo_path, "read");
         geo_histograms[index]=(TH1D*)geo_files[index]->Get(Form("geo-corrected_%s_%s",dt,fd));
         index++;
@@ -277,7 +339,7 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
     for (Para item:pr)
     {
       const char *fd=item.field;
-      sprintf(raw_path,"/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_NDnew14/%0.3f_eff_veto_cut_ND/%s/raw_%s.root",geoeff_cut,fd,fd);
+      sprintf(raw_path,"/exp/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_hadronselect_all_0mgsimple_woEhadcut/%.3f_eff_veto_cut_ND/%s/raw_%s.root",geoeff_cut,fd,fd);
       raw_files[index_raw]=new TFile(raw_path, "read");
       raw_histograms[index_raw]=(TH1D*)raw_files[index_raw]->Get(Form("raw_%s",fd));
       index_raw++;
@@ -294,7 +356,7 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
 
 
     // Create a folder before drawing plots
-    gSystem->mkdir(TString::Format("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_NDnew14/NDnewFDnew/%0.3f_eff_veto_cut", geoeff_cut), kTRUE);
+    gSystem->mkdir(TString::Format("/exp/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_hadronselect_all_0mgsimple_woEhadcut/ND_noTRIMplots_ICHP/%.3f_eff_veto_cut", geoeff_cut), kTRUE);
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -334,9 +396,9 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
     for(auto sel:br)
     {
       const char *dt=sel.sel_name;
-      cs_ND[i_ND]=new TCanvas(Form("c%01d",i_ND+1),dt,2700, 1500);
+      cs_ND[i_ND]=new TCanvas(Form("c%01d",i_ND+1),dt,3600, 2000);
       cs_ND[i_ND]->Divide(2,2);
-      rs_ND[i_ND]=new TCanvas(Form("r%01d",i_ND+1),Form("%s ratios",dt),2700, 1500);
+      rs_ND[i_ND]=new TCanvas(Form("r%01d",i_ND+1),Form("%s ratios",dt),3600, 2000);
       rs_ND[i_ND]->Divide(2,2);
 
       for(int k=0;k<4;k++)
@@ -369,7 +431,7 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
         hist3->GetXaxis()->SetTitle(Form("%s [%s]",fd,var_unit));
         hist3->GetYaxis()->SetTitle("# of events");
         TLegend *leg=new TLegend(0.1,0.75,0.33,0.9);
-        leg->SetHeader("comparison");
+        // leg->SetHeader("comparison");
         leg->AddEntry(hist1, "raw distribution");
         leg->AddEntry(hist2, "selection-cut distribution");
         leg->AddEntry(hist3, "geo corrected distribution");
@@ -396,7 +458,7 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
         rplot3->SetLineColor(kCyan);
         rplot3->Draw("samehist");
         TLegend *rleg=new TLegend(0.1,0.77,0.4,0.9);
-        rleg->SetHeader("comparison");
+        // rleg->SetHeader("comparison");
         rleg->AddEntry(rplot1, "geo vs raw");
         rleg->AddEntry(rplot2, "sel vs raw");
         rleg->AddEntry(rplot3, "sel vs geo");
@@ -415,11 +477,9 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
 
       }
       cs_ND[i_ND]->Update();
-      // cs_ND[i_ND]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio_center/%0.3f_eff_veto_cut/ND_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins.png",geoeff_cut,dt,geoeff_cut));
-      cs_ND[i_ND]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_NDnew14/NDnewFDnew/%0.3f_eff_veto_cut/ND_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins.png",geoeff_cut,dt,geoeff_cut));
+      cs_ND[i_ND]->SaveAs(Form("/exp/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_hadronselect_all_0mgsimple_woEhadcut/ND_noTRIMplots_ICHP/%.3f_eff_veto_cut/ND_0mgsimple_%s_PRISM_%.3f_eff_veto_cut_ND_hists_200_bins.png",geoeff_cut,dt,geoeff_cut));
       rs_ND[i_ND]->Update();
-      // rs_ND[i_ND]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio_center/%0.3f_eff_veto_cut/ND_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));;
-      rs_ND[i_ND]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_NDnew14/NDnewFDnew/%0.3f_eff_veto_cut/ND_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));;
+      rs_ND[i_ND]->SaveAs(Form("/exp/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_hadronselect_all_0mgsimple_woEhadcut/ND_noTRIMplots_ICHP/%.3f_eff_veto_cut/ND_0mgsimple_%s_PRISM_%.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));;
 
       i_ND++;
     } // end ND plots;
@@ -436,9 +496,9 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
     for (auto& sel:br)
     {
       const char *dt=sel.sel_name;
-      cs[i-1]=new TCanvas(Form("c%01d",i),dt,2700, 1500);
+      cs[i-1]=new TCanvas(Form("c%01d",i),dt,3600, 2000);
       cs[i-1]->Divide(2,2);
-      rs[i-1]=new TCanvas(Form("r%01d",i),dt,2700, 1500);
+      rs[i-1]=new TCanvas(Form("r%01d",i),dt,3600, 2000);
       rs[i-1]->Divide(2,2);
 
       int n=0;
@@ -471,7 +531,7 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
         hist3->GetXaxis()->SetTitle(fd);
         hist3->GetYaxis()->SetTitle("# of events");
         TLegend *leg=new TLegend(0.1,0.75,0.33,0.9);
-        leg->SetHeader("comparison");
+        // leg->SetHeader("comparison");
         leg->AddEntry(hist1, "raw distribution");
         leg->AddEntry(hist2, "mockND distribution");
         leg->AddEntry(hist3, "target distribution");
@@ -498,7 +558,7 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
         rplot3->SetLineColor(kCyan);
         rplot3->Draw("samehist");
         TLegend *rleg=new TLegend(0.1,0.77,0.4,0.9);
-        rleg->SetHeader("comparison");
+        // rleg->SetHeader("comparison");
         rleg->AddEntry(rplot1, "targeted vs raw");
         rleg->AddEntry(rplot2, "mockND vs raw");
         rleg->AddEntry(rplot3, "mockND vs targeted");
@@ -517,10 +577,8 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
       }
       cs[i-1]->Update();
       rs[i-1]->Update();
-      // cs[i-1]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio_center/%0.3f_eff_veto_cut/FD_1760931_%s_less_edge_pos_%0.3f_eff_cut_hists.png", geoeff_cut,dt,geoeff_cut));
-      // rs[i-1]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio_center/%0.3f_eff_veto_cut/FD_1760931_%s_less_edge_pos_%0.3f_eff_cut_hists_ratios.png", geoeff_cut,dt,geoeff_cut));
-      cs[i-1]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_NDnew14/NDnewFDnew/%0.3f_eff_veto_cut/FD_1760931_%s_less_edge_pos_%0.3f_eff_cut_hists.png", geoeff_cut,dt,geoeff_cut));
-      rs[i-1]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_NDnew14/NDnewFDnew/%0.3f_eff_veto_cut/FD_1760931_%s_less_edge_pos_%0.3f_eff_cut_hists_ratios.png", geoeff_cut,dt,geoeff_cut));
+      cs[i-1]->SaveAs(Form("/exp/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_hadronselect_all_0mgsimple_woEhadcut/ND_noTRIMplots_ICHP/%.3f_eff_veto_cut/FD_1760931_%s_less_edge_pos_%.3f_eff_cut_hists.png", geoeff_cut,dt,geoeff_cut));
+      rs[i-1]->SaveAs(Form("/exp/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_hadronselect_all_0mgsimple_woEhadcut/ND_noTRIMplots_ICHP/%.3f_eff_veto_cut/FD_1760931_%s_less_edge_pos_%.3f_eff_cut_hists_ratios.png", geoeff_cut,dt,geoeff_cut));
 
       i++;
     }// end br loop
@@ -563,8 +621,8 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
         ratio_ND_GvR[NDvFD_index]->SetAxisRange(0.,1.4,"Y");
         ratio_ND_GvR[NDvFD_index]->Draw("hist");
         // draw ND ratio: sel vs raw
-        ratio_ND_SvR[NDvFD_index]->SetLineColor(kGreen+4);
-        ratio_ND_SvR[NDvFD_index]->Draw("samehist");
+        // ratio_ND_SvR[NDvFD_index]->SetLineColor(kGreen+4);
+        // ratio_ND_SvR[NDvFD_index]->Draw("samehist");
         // draw ND ratio: sel vs geo
         // ratio_ND_SvG[NDvFD_index]->SetLineColor(kBlue);
         // ratio_ND_SvG[NDvFD_index]->Draw("samehist");
@@ -572,8 +630,8 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
         ratio_FD_TvR[NDvFD_index]->SetLineColor(kCyan+1);
         ratio_FD_TvR[NDvFD_index]->Draw("samehist");
         // draw FD ratio: selected vs raw
-        ratio_FD_SvR[NDvFD_index]->SetLineColor(kGreen);
-        ratio_FD_SvR[NDvFD_index]->Draw("samehist");
+        // ratio_FD_SvR[NDvFD_index]->SetLineColor(kGreen);
+        // ratio_FD_SvR[NDvFD_index]->Draw("samehist");
         // draw FD ratio: selected vs targeted
         // ratio_FD_SvT[NDvFD_index]->SetLineColor(kCyan+1);
         // ratio_FD_SvT[NDvFD_index]->Draw("samehist");
@@ -583,10 +641,10 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
         uppad_L[i_NDvFD] = new TLegend(0.6,0.7,0.9,0.9);
         uppad_L[i_NDvFD]->SetTextSize(0.035);
         uppad_L[i_NDvFD]->AddEntry(ratio_ND_GvR[NDvFD_index],TString::Format("ND: geo-corrected vs raw"),"l");
-        uppad_L[i_NDvFD]->AddEntry(ratio_ND_SvR[NDvFD_index],TString::Format("ND: selected vs raw"),"l");
+        // uppad_L[i_NDvFD]->AddEntry(ratio_ND_SvR[NDvFD_index],TString::Format("ND: selected vs raw"),"l");
         // uppad_L[i_NDvFD]->AddEntry(ratio_ND_SvG[NDvFD_index],TString::Format("ND: selected vs geo-corrected"),"l");
         uppad_L[i_NDvFD]->AddEntry(ratio_FD_TvR[NDvFD_index],TString::Format("FD: targeted vs raw"),"l");
-        uppad_L[i_NDvFD]->AddEntry(ratio_FD_SvR[NDvFD_index],TString::Format("FD: mockND vs raw"),"l");
+        // uppad_L[i_NDvFD]->AddEntry(ratio_FD_SvR[NDvFD_index],TString::Format("FD: mockND vs raw"),"l");
         // uppad_L[i_NDvFD]->AddEntry(ratio_FD_SvT[NDvFD_index],TString::Format("FD: selected vs target"),"l");
         uppad_L[i_NDvFD]->Draw();
 
@@ -627,19 +685,19 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
         ratioNDvFD_1[NDvFD_index]->Draw("HIST L P");
         //------------------------------------------------------------------------
         // ND: SvR vs FD: SvR
-        ratioNDvFD_2[NDvFD_index] = (TH1D*)ratio_ND_SvR[NDvFD_index]->Clone();
-        ratioNDvFD_2[NDvFD_index]->Divide(ratio_FD_SvR[NDvFD_index]);
-        ratioNDvFD_2[NDvFD_index]->SetLineColor(kGreen);
-        ratioNDvFD_2[NDvFD_index]->SetLineStyle(1);
-        ratioNDvFD_2[NDvFD_index]->SetMinimum(0.7);
-        ratioNDvFD_2[NDvFD_index]->SetMaximum(1.3);
-        // ratioNDvFD_2[NDvFD_index]->Sumw2(); //Create structure to store sum of squares of weights.
-        ratioNDvFD_2[NDvFD_index]->SetStats(0);
-        // ratioNDvFD_2[NDvFD_index]->SetLineWidth(0); // 0: No error bars; 1: error bars
-        ratioNDvFD_2[NDvFD_index]->SetMarkerStyle(21);
-        ratioNDvFD_2[NDvFD_index]->SetMarkerColor(kGreen); // 1: black; 3: green; 6: pink
-        ratioNDvFD_2[NDvFD_index]->SetMarkerSize(0.5);// 0.4: w/ error bars; 0.5: w/o error bars
-        ratioNDvFD_2[NDvFD_index]->Draw("HIST L P SAME");
+        // ratioNDvFD_2[NDvFD_index] = (TH1D*)ratio_ND_SvR[NDvFD_index]->Clone();
+        // ratioNDvFD_2[NDvFD_index]->Divide(ratio_FD_SvR[NDvFD_index]);
+        // ratioNDvFD_2[NDvFD_index]->SetLineColor(kGreen);
+        // ratioNDvFD_2[NDvFD_index]->SetLineStyle(1);
+        // ratioNDvFD_2[NDvFD_index]->SetMinimum(0.7);
+        // ratioNDvFD_2[NDvFD_index]->SetMaximum(1.3);
+        // // ratioNDvFD_2[NDvFD_index]->Sumw2(); //Create structure to store sum of squares of weights.
+        // ratioNDvFD_2[NDvFD_index]->SetStats(0);
+        // // ratioNDvFD_2[NDvFD_index]->SetLineWidth(0); // 0: No error bars; 1: error bars
+        // ratioNDvFD_2[NDvFD_index]->SetMarkerStyle(21);
+        // ratioNDvFD_2[NDvFD_index]->SetMarkerColor(kGreen); // 1: black; 3: green; 6: pink
+        // ratioNDvFD_2[NDvFD_index]->SetMarkerSize(0.5);// 0.4: w/ error bars; 0.5: w/o error bars
+        // ratioNDvFD_2[NDvFD_index]->Draw("HIST L P SAME");
         //------------------------------------------------------------------------
         // ND: SvG vs FD: SvT
         // ratioNDvFD_3[NDvFD_index] = (TH1D*)ratio_ND_SvG[NDvFD_index]->Clone();
@@ -659,7 +717,7 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
         dnpad_L[i_NDvFD] = new TLegend(0.75,0.1,0.9,0.25);
         dnpad_L[i_NDvFD]->SetTextSize(0.04);
         dnpad_L[i_NDvFD]->AddEntry(ratioNDvFD_1[NDvFD_index],TString::Format("ND_GvR vs FD_TvR"),"l");
-        dnpad_L[i_NDvFD]->AddEntry(ratioNDvFD_2[NDvFD_index],TString::Format("ND_SvR vs FD_MvR"),"l");
+        // dnpad_L[i_NDvFD]->AddEntry(ratioNDvFD_2[NDvFD_index],TString::Format("ND_SvR vs FD_MvR"),"l");
         // dnpad_L[i_NDvFD]->AddEntry(ratioNDvFD_3[NDvFD_index],TString::Format("ND_SvG vs FD_SvT"),"l");
         dnpad_L[i_NDvFD]->Draw();
 
@@ -676,9 +734,7 @@ void NDaFD_RatioPlots_FNAL(double geoeff_cut)
       }// end para loop
 
       c_ratio[i_NDvFD]->Update();
-      // c_ratio[i_NDvFD]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple/ratio_center/%0.3f_eff_veto_cut/NDvFD_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));
-      // c_ratio[i_NDvFD]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_NDnew14/ratio/%0.3f_eff_veto_cut/NDvFD_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));
-      c_ratio[i_NDvFD]->SaveAs(Form("/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_NDnew14/NDnewFDnew/%0.3f_eff_veto_cut/NDvFD_0mgsimple_%s_PRISM_%0.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));
+      c_ratio[i_NDvFD]->SaveAs(Form("/exp/dune/app/users/flynnguo/NDeff_muon_Plots/0mgsimple_hadronselect_all_0mgsimple_woEhadcut/ND_noTRIMplots_ICHP/%.3f_eff_veto_cut/NDvFD_0mgsimple_%s_PRISM_%.3f_eff_veto_cut_ND_hists_200_bins_ratios.png",geoeff_cut,dt,geoeff_cut));
 
 
       i_NDvFD++;
