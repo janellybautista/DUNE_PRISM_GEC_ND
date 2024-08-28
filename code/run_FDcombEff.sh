@@ -35,7 +35,7 @@ cd ${_CONDOR_JOB_IWD}
 
 echo "Install dependencies"
 echo "pip install --target=${_CONDOR_JOB_IWD} uproot"
-pip install --target=${_CONDOR_JOB_IWD} uproot
+pip install --target=${_CONDOR_JOB_IWD} uproot==5.3.1
 # echo "pip install --target=${_CONDOR_JOB_IWD} uproot4"
 # pip install --target=${_CONDOR_JOB_IWD} uproot4
 # echo "pip install --target=${_CONDOR_JOB_IWD} uproot3"
