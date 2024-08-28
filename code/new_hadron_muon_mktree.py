@@ -37,8 +37,8 @@ meanPDPZ = array('f', [ 57.7352, 59.1433, 60.8336, 62.4821, 65.005, 67.5822, 69.
 gDecayZ=interp1d(OffAxisPoints,meanPDPZ,fill_value='extrapolate')
 
 # These are used to translate between the near detector coordinate system and the neutrino beamline coordinate system. We use this to calculate the average neutrino direction, assuming the mean neutrino production point as a function of neutrino interaction x, which is given in the arrays above.
-beamRefDetCoord = [0.0, 0.05387, 6.66] #spherical coords, radians
-detRefBeamCoord = [0, 0, 562.1179] #xyz coords of reference detector position
+beamRefDetCoord = [0.0, 0.05387, 6.66] #spherical coords, radians [m]
+detRefBeamCoord = [0, 0, 562.1179] #xyz coords of reference detector position [m]
 beamLineRotation = -0.101
 
 # Mass of Pi0 [GeV]
@@ -68,7 +68,7 @@ def isContained(x, y, z) :
     return True
 
 treeVarsToRead=['isCC',
-                #'nuPDG',
+                'nuPDG',
                 'Ev',
                 'LepE',
                 'eP',
@@ -81,6 +81,7 @@ treeVarsToRead=['isCC',
                 'LepMomX',
                 'LepMomY',
                 'LepMomZ',
+                'W',
                 #'NuMomX',
                 #'NuMomY',
                 #'NuMomZ',
@@ -98,14 +99,6 @@ list_of_directories=["0mgsimple","0m","1.75m","2m","4m","5.75m","8m","9.75m","12
                      "26.75m","28m","28.25m","28.5m","0mgsimpleRHC","0mRHC","1.75mRHC","2mRHC","4mRHC","5.75mRHC","8mRHC","9.75mRHC","12mRHC",\
                      "13.75mRHC","16mRHC" "17.75mRHC","20mRHC","21.75mRHC","24mRHC","25.75mRHC","26.75mRHC","28mRHC","28.25mRHC","28.5mRHC"]
 
-#CAF_FHC_fName="/storage/shared/cvilela/CAF/ND_v7/00/FHC.1000[1-2]*.CAF.root"E
-#CAF_FHC_fName="/storage/shared/cvilela/CAF/ND_v7/0"+argv[1]+"/FHC.100"+argv[1]+argv[2]+"*.CAF.root"
-#CAF_RHC_fName="/storage/shared/cvilela/CAF/ND_v7/0"+argv[1]+"/RHC.100"+argv[1]+argv[2]+"*.CAF.root"
-#allFiles=glob(CAF_FHC_fName)
-#allFiles+=glob(CAF_RHC_fName)
-#CAF_files="/storage/shared/wshi/CAFs/NDFHC_PRISM/"+argv[1]+argv[2]+"/FHC.10"+argv[1]+argv[2]+"*.CAF.root"
-#CAF_files="/storage/shared/wshi/CAFs/NDFHC_PRISM/2[0,1,2]/FHC.102[0,1,2]*.CAF.root"
-# CAF_files="/storage/shared/barwu/10thTry/NDCAF/"+argv[1]+"/*.CAF.root"
 CAF_files = str(sys.argv[1])
 # allFiles=glob(CAF_files) #file #s range from 0-29
 #cpu processing is set up later in the script
@@ -163,6 +156,7 @@ def processFiles(f):
         if APPLY_FV_CUT: CAF["inFV"] = isFV_vec(CAF["vtx_x"], CAF["vtx_y"], CAF["vtx_z"])
         else: CAF["inFV"] = [True]*len(CAF["vtx_x"])
 
+
         # Get tree with x, y and phi of geometric efficiency throws.
         geoThrows = concatenate("{0}:geoEffThrows".format(f), ['geoEffThrowsY', 'geoEffThrowsZ', 'geoEffThrowsPhi'], library = "np")
         # geoThrows = concatenate("{0}:ThrowsFD".format(f), ['throwVtxY', 'throwVtxZ', 'throwRot'], library = "np") #FD
@@ -182,6 +176,7 @@ def processFiles(f):
 
 
         counter = 0 # Count the events pass the cuts
+        Nthrowcounter = 0 # Count the events w/ NthrowinFV=0
         # Event loop
         for i_event in range(len(CAF['geoEffThrowResults'])):
         # for i_event in range(len(CAF['hadron_throw_result'])):
@@ -189,16 +184,20 @@ def processFiles(f):
 
             # Exclude all events which are not inside the ND FV and choose only CC events
             if not CAF["inFV"][i_event] or CAF["isCC"][i_event] == 0:
-                # print("i_event: ", i_event ,", i_vtx_x: ", CAF["vtx_x"][i_event], ", i_vtx_y: ", CAF["vtx_y"][i_event]-offset[1], ", i_vtx_z: ",CAF["vtx_z"][i_event]-offset[2])
+                # print("i_event: ", i_event ,", i_vtx_x: ", CAF["vtx_x"][i_event], ", i_vtx_y: ", CAF["vtx_y"][i_event], ", i_vtx_z: ",CAF["vtx_z"][i_event])
                 # print("CAF[inFV][i_event]: ", CAF["inFV"][i_event])
                 # print("CAF[isCC][i_event]: ", CAF["isCC"][i_event])
                 # print("t/f: ", isFV_vec(CAF["vtx_x"][i_event], CAF["vtx_y"][i_event], CAF["vtx_z"][i_event]))
                 continue
             counter += 1
-            # print("Counter: ", counter)
-            # print("i_event: ", i_event ,", i_vtx_x: ", CAF["vtx_x"][i_event], ", i_vtx_y: ", CAF["vtx_y"][i_event]-offset[1], ", i_vtx_z: ",CAF["vtx_z"][i_event]-offset[2])
+            # print("Counter: ", counter, "i_event: ", i_event)
+            # # print("i_event: ", i_event ,", i_vtx_x: ", CAF["vtx_x"][i_event], ", i_vtx_y: ", CAF["vtx_y"][i_event]-offset[1], ", i_vtx_z: ",CAF["vtx_z"][i_event]-offset[2])
             # print("CAF[inFV][i_event]: ", CAF["inFV"][i_event])
             # print("CAF[isCC][i_event]: ", CAF["isCC"][i_event])
+            # print("t/f: ", isFV_vec(CAF["vtx_x"][i_event], CAF["vtx_y"][i_event], CAF["vtx_z"][i_event]))
+            # if CAF["Ehad_veto"][i_event] > 30 and CAF["Ev"][i_event] < 1 :
+            #     # print("i_event: ", i_event ,", i_vtx_x: ", CAF["vtx_x"][i_event], ", i_vtx_y: ", CAF["vtx_y"][i_event], ", i_vtx_z: ",CAF["vtx_z"][i_event], end="\n")
+            #     print("i_event: ", i_event ,"Ehad_veto: ", CAF["Ehad_veto"][i_event], ", Ev: " , CAF["Ev"][i_event], end = "\n")
 
 
             # Accumulators for efficiency calculation
@@ -221,9 +220,12 @@ def processFiles(f):
 
             NthrowsInFV = sum(throws_FV) # Count how many throws were in the FV. Will be useful later.
             # print("NthrowsInFV: ", NthrowsInFV)
+
             # Don't include throws inside the ND_FV
             if NthrowsInFV==0 and APPLY_FV_CUT:
-                print("i_event: ", i_event, "vtx_x: ", [CAF["vtx_x"][i_event]], ", geoEffThrowsY: ", geoThrows["geoEffThrowsY"][i_event]-offset[1], ", geoEffThrowsZ: ", geoThrows["geoEffThrowsZ"][i_event]-offset[2])
+                Nthrowcounter += 1
+                print("i_event: ", i_event, ", NthrowsInFV: ", NthrowsInFV, ", vtx_x: ", [CAF["vtx_x"][i_event]], ", geoEffThrowsY: ", geoThrows["geoEffThrowsY"][int(i_event/N_EVENTS_PER_THROW)]-offset[1], ", geoEffThrowsZ: ", geoThrows["geoEffThrowsZ"][int(i_event/N_EVENTS_PER_THROW)]-offset[2])
+                print("Nthrowcounter: ", Nthrowcounter)
                 # effs[i_event]=-1.
                 # effs_tracker[i_event]=-1.
                 # effs_contained[i_event]=-1.
@@ -351,19 +353,14 @@ def processFiles(f):
                 effs_combined[i_event] = float(thisEff_combined)/(78.*64)
 
 
-
-        # This used to be used for matplotlib, but I don't use that for histogram-making.
+        # Calculate selected hadrons
         fv = np.logical_and(CAF["inFV"], CAF["isCC"])
-        # Choose muon
-        # mu = np.absolute(CAF["LepPDG"]) == 13
-        mu = CAF["LepPDG"] == 13
-        fv = np.logical_and(fv, mu)
-        no_weird_events = np.absolute(np.sum(CAF["muon_endpoint"], axis = 1)) > 0.
-        fv = np.logical_and(fv, no_weird_events)
 
+        # Apply ND veto cut
         had_containment = CAF["Ehad_veto"] < 30
         sel = np.logical_and(had_containment, fv)
 
+        # Use CAF info
         # sel_tracker = np.logical_and(CAF['muon_tracker'] > 0, fv)
         # isContained_vec = np.vectorize(isContained)
         # sel_contained = np.logical_and(isContained_vec(CAF["muon_endpoint"][:,0], CAF["muon_endpoint"][:,1], CAF["muon_endpoint"][:,2]), fv)
@@ -419,8 +416,15 @@ def processFiles(f):
             i+=1
 
         # Only store CC&inFV events into ntuple files
-        # Create a mask for events that pass the cuts
-        mask = np.logical_and(CAF["inFV"], CAF["isCC"] == 1)
+        # Create a mask for events that pass the cuts: inFV and isCC and LepPDG=13
+        mask = np.logical_and(CAF["inFV"], CAF["isCC"])
+        # # Apply no cut
+        # mask = np.ones(len(CAF["isCC"]), dtype=bool)
+        # Choose muon
+        # mu = np.absolute(CAF["LepPDG"]) == 13
+        mu = CAF["LepPDG"] == 13
+        mask = np.logical_and(mask, mu)
+
         # Apply the mask to all relevant arrays
         filtered_CAF = {key: value[mask] for key, value in CAF.items()}
         filtered_effs = effs[mask]
@@ -462,9 +466,12 @@ def processFiles(f):
                                                  #'NuMomZ':np.float64,
                                                  'isCC':np.int32,
                                                  'inFV':np.int32,
+                                                 'LepPDG':np.int32,
                                                  'vtx_x':np.float64,
+                                                 'Ehad_veto':np.float64,
                                                  'Ev':np.float64,
                                                  'E_vis_true':np.float64,
+                                                 'W':np.float64,
                                                  #'LepE':np.float64,
                                                  #'LepNuAngle':np.float64,
                                                  'cos_LepNuAngle':np.float64,
@@ -484,12 +491,15 @@ def processFiles(f):
             extend_dict = {
                 'isCC': filtered_CAF['isCC'],
                 'inFV': filtered_CAF['inFV'],
+                'LepPDG': filtered_CAF['LepPDG'],
                 'vtx_x': filtered_CAF['vtx_x'],
+                'Ehad_veto':filtered_CAF['Ehad_veto'],
                 'cos_LepNuAngle': cosangle,
                 'LepMomTot': LepMomTot,
                 'LongMom': np.multiply(LepMomTot,cosangle),
                 'Ev': filtered_CAF['Ev'],
                 'E_vis_true': e_vis_true,
+                'W':filtered_CAF['W'],
                 'muon_contained_eff': filtered_effs_contained,
                 'muon_tracker_eff': filtered_effs_tracker,
                 'hadron_selected_eff': filtered_effs,
