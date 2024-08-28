@@ -26,11 +26,11 @@ NUM_PROCS=30
 offset=[0.,5.5,411.]
 # Average neutrino decay position in beam coordinates as a function of vertex x (from Luke):
 # Will be used to set the decay position event-by-event.
-OffAxisPoints=array('f', [-2, 0.5, 3, 5.5, 8, 10.5, 13, 15.5, 18, 20.5, 23, 25.5, 28, 30.5])
-meanPDPZ=array('f', [93.6072, 93.362, 90.346, 85.6266, 81.1443, 76.6664, 73.0865, 69.8348, 67.5822, 65.005, 62.4821, #why are these discreet data sets?
-                     60.8336, 59.1433, 57.7352])
-#gDecayZ=TGraph(14, OffAxisPoints, meanPDPZ)
+OffAxisPoints = array('f', [-30.5,   -28,    -25.5,   -23,     -20.5,   -18,     -15.5,   -13,    -10.5,   -8,      -5.5,    -3,    -0.5,     0,       0.5,    3,     5.5,    8,      10.5,   13,     15.5,   18,     20.5,  23,     25.5,   28,     30.5])
+meanPDPZ = array('f', [ 57.7352, 59.1433, 60.8336, 62.4821, 65.005, 67.5822, 69.8348, 73.0865, 76.6664, 81.1443, 85.6266, 90.346, 93.362, 93.6072, 93.362,  90.346, 85.6266, 81.1443, 76.6664, 73.0865, 69.8348, 67.5822, 65.005, 62.4821, 60.8336, 59.1433, 57.7352]) #why are these discreet data sets?
+#gDecayZ = TGraph(14, OffAxisPoints, meanPDPZ)
 gDecayZ=interp1d(OffAxisPoints,meanPDPZ,fill_value='extrapolate')
+
 # These are used to translate between the near detector coordinate system and the neutrino beamline coordinate system. We use this to calculate the average neutrino direction,
 # assuming the mean neutrino production point as a function of neutrino interaction x, which is given in the arrays above.
 beamRefDetCoord=[0.0, 0.05387, 6.66] #spherical coords, radians
@@ -52,6 +52,7 @@ def isFV(x, y, z):
 
 # Vectorize fiducial volume function
 isFV_vec = np.vectorize(isFV)
+
 # Simple muon containment cut
 def isContained(x, y, z) :
     if abs(x)>350:return False
@@ -62,7 +63,7 @@ def isContained(x, y, z) :
 FV_cut=True
 LAr_position=[-2800.,-1400.,0.]
 # LAr_position=[-2800.,-2575.,-2400.,-2175.,-2000.,-1775.,-1600.,-1375.,-1200.,-975.,-800.,-575.,-400.,-175.,0.]
-vertex_position=[-299.,-292.,-285.,-278.,-271.,-264.,-216.,-168.,-120.,-72.,-24.,24.,72.,120.,168.,216.,264.,271.,278.,285.,292.,299.]
+# vertex_position=[-299.,-292.,-285.,-278.,-271.,-264.,-216.,-168.,-120.,-72.,-24.,24.,72.,120.,168.,216.,264.,271.,278.,285.,292.,299.]
 TreeVars=["ND_OffAxis_Sim_mu_start_v_xyz_LAr", "ND_OffAxis_Sim_mu_start_p_xyz_LAr", "hadron_throw_result_LAr","ND_LepNuAngle","ND_Gen_numu_E","ND_E_vis_true"]
 
 # Read FD CAF
@@ -110,7 +111,6 @@ def processFiles(f):
     # tree.Branch("ND_LepNuAngle", ND_LepNuAngle_a)
     # tree.Branch("ND_Gen_numu_E", ND_Gen_numu_E_a)
     # tree.Branch("ND_E_vis_true", ND_E_vis_true_a)
-
     # Event loop
     for i_event in range(len(FD_sim_Results['hadron_throw_result_LAr'])):
         event=FD_sim_Results['hadron_throw_result_LAr'][i_event]
@@ -124,7 +124,6 @@ def processFiles(f):
         effs_contained.clear()
         effs_selected.clear()
         effs_combined.clear()
-
         # ND_OffAxis_Sim_mu_start_v_xyz_LAr.clear()
         # ND_OffAxis_Sim_mu_start_p_xyz_LAr.clear()
         # ND_OffAxis_Sim_mu_start_v_xyz_LAr = FD_sim_Results["ND_OffAxis_Sim_mu_start_v_xyz_LAr"]
@@ -134,11 +133,17 @@ def processFiles(f):
         # ND_E_vis_true_a = FD_sim_Results["ND_E_vis_true"]
         #print(cafTree['LepNuAngle'][i_event])
         for det_pos in range(len(event)):
-        #for det_pos in [0,14]: #14 is the last LAr position index
+        # for det_pos in [0,14]: #14 is the last LAr position index
             # print("LAr pos=",end="")
             # print(effValues['ND_LAr_dtctr_pos'][det_pos])
+
+            # Only pick on-axis
+            # if (det_pos != 2):
+            #     continue
             # print("det_pos=",end="")
             # print(det_pos)
+            # print("LAr_position[det_pos]", end="")
+            # print(LAr_position[det_pos])
 
             effs.push_back(std.vector('double')())
             effs_tracker.push_back(std.vector('double')())
