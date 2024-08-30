@@ -14,21 +14,21 @@ exit                                       # Quit FNAL
 ```
 Environment setup (only do it once):
 ```
-cd /exp/dune/app/users/flynnguo                                             # Replace with your username for all commands below
+cd /exp/dune/app/users/$USER                                             # Replace with your username for all commands below
 git clone https://github.com/FlynnYGUO/DUNE_PRISM_GEC_ND.git
 # This allows using pip
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh 
 setup dunetpc v09_41_00_02 -q e20:prof
-pip install --target=/exp/dune/app/users/flynnguo/lib/python3.9/site-packages uproot
-pip install --target=/exp/dune/app/users/flynnguo/lib/python3.9/site-packages torch
-pip install --target=/exp/dune/app/users/flynnguo/lib/python3.9/site-packages scipy
+pip install --target=/exp/dune/app/users/$USER/lib/python3.9/site-packages uproot
+pip install --target=/exp/dune/app/users/$USER/lib/python3.9/site-packages torch
+pip install --target=/exp/dune/app/users/$USER/lib/python3.9/site-packages scipy
 ```
 Next time once you log in to the FNAL machine, do the following (do it every time you log in):
 ```
-cd /exp/dune/app/users/flynnguo
+cd /exp/dune/app/users/$USER
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh 
 setup dunetpc v09_41_00_02 -q e20:prof
-export PYTHONPATH=/exp/dune/app/users/flynnguo/lib/python3.9/site-packages:$PYTHONPATH
+export PYTHONPATH=/exp/dune/app/users/$USER/lib/python3.9/site-packages:$PYTHONPATH
 ```
 You can also source the new version of ROOT:
 ```
@@ -64,7 +64,7 @@ tar -czvf ND_work.tar.gz setup_NDcombEff.sh new_hadron_muon_mktree.py muonEff30.
 # -N 2 means 2 jobs, this is now set as running 1 file per job as I have two files in txt file.
 # If you have X files in your text file, set: -N X
 # You can use ```wc -l NDCAFs.txt``` to check the number of files in txt file
-jobsub_submit -G dune -N 9980 --memory=5GB --disk=10GB --expected-lifetime=1.5h --cpu=1 --resource-provides=usage_model=DEDICATED,OPPORTUNISTIC,OFFSITE --tar_file_name=dropbox:///exp/dune/app/users/flynnguo/DUNE_PRISM_GEC_ND/code/ND_work.tar.gz --use-cvmfs-dropbox -l '+SingularityImage=\"/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-wn-sl7:latest\"' --append_condor_requirements='(TARGET.HAS_Singularity==true&&TARGET.HAS_CVMFS_dune_opensciencegrid_org==true&&TARGET.HAS_CVMFS_larsoft_opensciencegrid_org==true&&TARGET.CVMFS_dune_opensciencegrid_org_REVISION>=1105&&TARGET.HAS_CVMFS_fifeuser1_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser2_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser3_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser4_opensciencegrid_org==true)' file:///exp/dune/app/users/flynnguo/DUNE_PRISM_GEC_ND/code/run_NDcombEff.sh
+jobsub_submit -G dune -N 9980 --memory=5GB --disk=10GB --expected-lifetime=1.5h --cpu=1 --resource-provides=usage_model=DEDICATED,OPPORTUNISTIC,OFFSITE --tar_file_name=dropbox:///exp/dune/app/users/$USER/DUNE_PRISM_GEC_ND/code/ND_work.tar.gz --use-cvmfs-dropbox -l '+SingularityImage=\"/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-wn-sl7:latest\"' --append_condor_requirements='(TARGET.HAS_Singularity==true&&TARGET.HAS_CVMFS_dune_opensciencegrid_org==true&&TARGET.HAS_CVMFS_larsoft_opensciencegrid_org==true&&TARGET.CVMFS_dune_opensciencegrid_org_REVISION>=1105&&TARGET.HAS_CVMFS_fifeuser1_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser2_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser3_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser4_opensciencegrid_org==true)' file:///exp/dune/app/users/$USER/DUNE_PRISM_GEC_ND/code/run_NDcombEff.sh
 ```
 
 To query the job status: ```jobsub_q <usrname> -G dune```. [See job details](https://fifemon.fnal.gov/monitor/d/000000115/job-cluster-summary?orgId=1&var-cluster=73871417&var-schedd=jobsub02.fnal.gov)  
@@ -84,13 +84,13 @@ for ifile in $(cat ${INPUT_TAR_DIR_LOCAL}/NDCAFs.txt | head -${LINE_N} | tail -1
 # Make a tarball to send everything you need to run your program on grid node
 cd DUNE_PRISM_GEC_ND/code
 # Write list of files into a txt file, remember to change the foldername before submitting job
-ls -d "/pnfs/dune/persistent/users/flynnguo/FDGeoEffinND/<FDGeoEff_JOBID>"/* | sed "s\/pnfs\root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr\g" > FDCAFs.txt
+ls -d "/pnfs/dune/persistent/users/$USER/FDGeoEffinND/<FDGeoEff_JOBID>"/* | sed "s\/pnfs\root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr\g" > FDCAFs.txt
 # For example:
-ls -d "/pnfs/dune/persistent/users/flynnguo/FDGeoEffinND/FDGeoEff_2811722"/* | sed "s\/pnfs\root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr\g" > FDCAFs.txt
+ls -d "/pnfs/dune/persistent/users/$USER/FDGeoEffinND/FDGeoEff_2811722"/* | sed "s\/pnfs\root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr\g" > FDCAFs.txt
 # Now make a tarball
 tar -czvf FD_work.tar.gz setup_NDcombEff.sh FD_maketree.py muonEff30.nn muonEffModel.py FDCAFs.txt
 # You can use ```wc -l FDCAFs.txt``` to check the number of files in txt file
-jobsub_submit -G dune -N 9635 --memory=5GB --disk=10GB --expected-lifetime=8h --cpu=1 --resource-provides=usage_model=DEDICATED,OPPORTUNISTIC,OFFSITE --tar_file_name=dropbox:///exp/dune/app/users/flynnguo/DUNE_PRISM_GEC_ND/code/FD_work.tar.gz --use-cvmfs-dropbox -l '+SingularityImage=\"/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-wn-sl7:latest\"' --append_condor_requirements='(TARGET.HAS_Singularity==true&&TARGET.HAS_CVMFS_dune_opensciencegrid_org==true&&TARGET.HAS_CVMFS_larsoft_opensciencegrid_org==true&&TARGET.CVMFS_dune_opensciencegrid_org_REVISION>=1105&&TARGET.HAS_CVMFS_fifeuser1_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser2_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser3_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser4_opensciencegrid_org==true)' file:///exp/dune/app/users/flynnguo/DUNE_PRISM_GEC_ND/code/run_FDcombEff.sh
+jobsub_submit -G dune -N 9635 --memory=5GB --disk=10GB --expected-lifetime=8h --cpu=1 --resource-provides=usage_model=DEDICATED,OPPORTUNISTIC,OFFSITE --tar_file_name=dropbox:///exp/dune/app/users/$USER/DUNE_PRISM_GEC_ND/code/FD_work.tar.gz --use-cvmfs-dropbox -l '+SingularityImage=\"/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-wn-sl7:latest\"' --append_condor_requirements='(TARGET.HAS_Singularity==true&&TARGET.HAS_CVMFS_dune_opensciencegrid_org==true&&TARGET.HAS_CVMFS_larsoft_opensciencegrid_org==true&&TARGET.CVMFS_dune_opensciencegrid_org_REVISION>=1105&&TARGET.HAS_CVMFS_fifeuser1_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser2_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser3_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser4_opensciencegrid_org==true)' file:///exp/dune/app/users/$USER/DUNE_PRISM_GEC_ND/code/run_FDcombEff.sh
 ```
 
 ## NNhome machine
