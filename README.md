@@ -4,7 +4,6 @@ DUNE-PRISM: GEC from muon side
 > - Some are copied from: [FNAL instruction](https://github.com/FlynnYGUO/NeutrinoPhysics/blob/main/GEC/BaronCodeOutdated/NDGEC.md) and [NNhome instruction](https://github.com/FlynnYGUO/NeutrinoPhysics/blob/main/GEC/BaronNewCode/Instructions.md)
 > - [DUNE Computing Training](https://dune.github.io/computing-basics/index.html)  
 > - [DUNE: SL7 to ALMA9](https://wiki.dunescience.org/wiki/SL7_to_Alma9_conversion):
-> - opensciencegrid.org/fermilab/fnal-dev-sl7:latest
 > -```/cvmfs/oasis.opensciencegrid.org/mis/apptainer/current/bin/apptainer shell --shell=/bin/bash \
 -B /cvmfs,/exp,/nashome,/pnfs/dune,/opt,/run/user,/etc/hostname,/etc/hosts,/etc/krb5.conf --ipc --pid \
 /cvmfs/singularity.opensciencegrid.org/fermilab/fnal-dev-sl7:latest```
