@@ -14,7 +14,7 @@ exit                                       # Quit FNAL
 ```
 Environment setup (only do it once):
 ```
-cd /exp/dune/app/users/$USER                                             # Replace with your username for all commands below
+cd /exp/dune/app/users/$USER                                            
 git clone https://github.com/FlynnYGUO/DUNE_PRISM_GEC_ND.git
 # This allows using pip
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh 
