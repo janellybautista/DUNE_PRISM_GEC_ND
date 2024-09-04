@@ -55,6 +55,21 @@ cd DUNE_PRISM_GEC_ND/code
 python3 new_hadron_muon_mktree.py /pnfs/dune/persistent/physicsgroups/dunelbl/abooth/PRISM/Production/Simulation/ND_CAFMaker/v7/CAF/0mgsimple/101/FHC.1101999.CAF.root
 ```
 
+
+
+Run this script to draw histograms directly using the FD CAFs and efficiency files produced by the above shell script:
+```
+root -l -b
+.L /home/fyguo/DUNE_PRISM_GEC_ND/code/draw_histograms_FD.cpp
+draw_histograms_FD(<geoeff_cut>) #For example: draw_histograms_FD(0.1) means 10% geoeff_cut
+```
+
+### III. Get ND ratios vs FD ratios
+Generate all ND ratios, FD ratios and NDvsFD ratios.
+```
+root -l -b /home/fyguo/DUNE_PRISM_GEC_ND/code/NDaFD_RatioPlots.cpp
+```
+
 #### 3.1 Submit grid job (Geometric efficiency for ND events at ND)
 ```
 # Make a tarball to send everything you need to run your program on grid node
@@ -132,17 +147,4 @@ This generates efficiency files for far detector events.
 To submit a job:
 ```
 sbatch Slurm_nnhome_FD.sh
-```
-
-Run this script to draw histograms directly using the FD CAFs and efficiency files produced by the above shell script:
-```
-root -l -b
-.L /home/fyguo/DUNE_PRISM_GEC_ND/code/draw_histograms_FD.cpp
-draw_histograms_FD(<geoeff_cut>) #For example: draw_histograms_FD(0.1) means 10% geoeff_cut
-```
-
-### III. Get ND ratios vs FD ratios
-Generate all ND ratios, FD ratios and NDvsFD ratios.
-```
-root -l -b /home/fyguo/DUNE_PRISM_GEC_ND/code/NDaFD_RatioPlots.cpp
 ```
