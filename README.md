@@ -20,7 +20,9 @@ exit                                       # Quit FNAL
 ```
 or, to diretly the DUNE FNAL machine using the vnc server
 ```
-ssh -Y -L 5901:localhost:5901 janelly@dunegpvm01.fnal.govEnvironment setup (only do it once):
+ssh -Y -L 5901:localhost:5901 janelly@dunegpvm01.fnal.gov
+```
+Environment setup (only do it once):
 ```
 cd /exp/dune/app/users/$USER                                            
 git clone https://github.com/FlynnYGUO/DUNE_PRISM_GEC_ND.git
