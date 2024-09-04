@@ -15,10 +15,12 @@ DUNE-PRISM: GEC from muon side
 #### 1. Log in & DUNE FNAL machines (dunegpvm*) environment setup:
 ```
 kfnal                                      # Short for kinit -f <username>@FNAL.GOV. In my laptop, alias kfnal="/usr/bin/kinit flynnguo@FNAL.GOV" in ~/.zshrc
-ssh -X flynnguo@dunegpvm15.fnal.gov
+ssh -X janelly@dunegpvm01.fnal.gov
 exit                                       # Quit FNAL
 ```
-Environment setup (only do it once):
+or, to diretly the DUNE FNAL machine using the vnc server
+```
+ssh -Y -L 5901:localhost:5901 janelly@dunegpvm01.fnal.govEnvironment setup (only do it once):
 ```
 cd /exp/dune/app/users/$USER                                            
 git clone https://github.com/FlynnYGUO/DUNE_PRISM_GEC_ND.git
