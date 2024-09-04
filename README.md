@@ -90,41 +90,10 @@ tar -czvf FD_work.tar.gz setup_NDcombEff.sh FD_maketree.py muonEff30.nn muonEffM
 jobsub_submit -G dune -N 9635 --memory=5GB --disk=10GB --expected-lifetime=8h --cpu=1 --resource-provides=usage_model=DEDICATED,OPPORTUNISTIC,OFFSITE --tar_file_name=dropbox:///exp/dune/app/users/flynnguo/DUNE_PRISM_GEC_ND/code/FD_work.tar.gz --use-cvmfs-dropbox -l '+SingularityImage=\"/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-wn-sl7:latest\"' --append_condor_requirements='(TARGET.HAS_Singularity==true&&TARGET.HAS_CVMFS_dune_opensciencegrid_org==true&&TARGET.HAS_CVMFS_larsoft_opensciencegrid_org==true&&TARGET.CVMFS_dune_opensciencegrid_org_REVISION>=1105&&TARGET.HAS_CVMFS_fifeuser1_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser2_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser3_opensciencegrid_org==true&&TARGET.HAS_CVMFS_fifeuser4_opensciencegrid_org==true)' file:///exp/dune/app/users/flynnguo/DUNE_PRISM_GEC_ND/code/run_FDcombEff.sh
 ```
 
-## NNhome machine
-### 0. Setup
-#### 1. Log in:
-```
-ssh -X fyguo@nnhome.physics.sunysb.edu       # Log my ivy account: <username>@ivy.physics.sunysb.edu
-passwd                                     # Reset my password  
-exit                                       # Quit ivy
-```
-#### 2. Install packages/tools
-```
-pip install --target=<a directory you specify> uproot  # Install uproot, you may also need to install torch
-source /home/rrazakami/workspace/ROOT/root_binary/bin/thisroot.sh  # Use other's ROOT source file instead of installing a new one under my repository
-# Remember to source root.sh every time once log in the NNhome machine
-```
-#### 3. Muon NN
-The network outputs how probable a muon is fully contained in ND LAr and tracker matched in TMS downstream: https://github.com/weishi10141993/MuonEffNN
-The current used network file is located at ```/home/barwu/repos/MuonEffNN/8thTry/muonEff30.nn```
-
-### I. Get ND eff files
-The ND CAFs have been copied from Fermilab to NNhome under this path:
-```
-/storage/shared/barwu/10thTry/NDCAF
-```
-They are grouped into different folders, as well as numerical subfolders. You will need to check these names to decide which of the subfolders you will run.
-
-The following scripts are used to produce raw, selected, and efficiency-corrected distributions. These are the red-green-blue curves for muon only (fully contained and tracker matched), hadron only, and combined.
 
 Run the script using python3, this creates a TTree containing all efficiency information:
 ```
 python3 /home/fyguo/DUNE_PRISM_GEC_ND/code/new_hadron_muon_mktree.py [folder]/[subfolder]
-```
-A batch submission is also available, it usually takes half a day to complete:
-```
-sbatch Slurm_nnhome_ND.sh [folder]/[subfolder] # For example, Omgsimple/104
-# There are four GPU node lists: fir, birch, aspen, cedar
 ```
 The batch job should generate 1000 efficiency files. These files contain the efficiency information of each event, the cut information, as well as 3 additional sets of information about the total lepton momentum, longitudinal lepton momentum and the cosine of the angle between the neutrino and lepton momentum vectors.
 
