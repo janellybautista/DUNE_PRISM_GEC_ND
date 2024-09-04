@@ -22,6 +22,12 @@ or, to directly access the DUNE FNAL machine through the vnc server, use
 ```
 ssh -Y -L 5901:localhost:5901 janelly@dunegpvm01.fnal.gov
 ```
+ [DUNE: SL7 to ALMA9](https://wiki.dunescience.org/wiki/SL7_to_Alma9_conversion):
+```
+/cvmfs/oasis.opensciencegrid.org/mis/apptainer/current/bin/apptainer shell --shell=/bin/bash \
+-B /cvmfs,/exp,/nashome,/pnfs/dune,/opt,/run/user,/etc/hostname,/etc/hosts,/etc/krb5.conf --ipc --pid \
+/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-dev-sl7:latest
+```
 Environment setup (only do it once):
 ```
 cd /exp/dune/app/users/$USER                                            
