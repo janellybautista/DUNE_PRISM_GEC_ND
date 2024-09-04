@@ -14,7 +14,7 @@ exit                                       # Quit FNAL
 ```
 Environment setup (only do it once):
 ```
-cd /exp/dune/app/users/flynnguo                                             # Replace with your username for all commands below
+cd /exp/dune/app/users/$USER                                             # Replace with your username for all commands below
 git clone https://github.com/FlynnYGUO/DUNE_PRISM_GEC_ND.git
 # This allows using pip
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh 
@@ -22,7 +22,7 @@ setup dunetpc v09_41_00_02 -q e20:prof
 ```
 Next time once you log in to the FNAL machine, do the following (do it every time you log in):
 ```
-cd /exp/dune/app/users/flynnguo
+cd /exp/dune/app/users/$USERS
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh 
 setup dunetpc v09_41_00_02 -q e20:prof
 export PYTHONPATH=/exp/dune/app/users/flynnguo/lib/python3.9/site-packages:$PYTHONPATH
