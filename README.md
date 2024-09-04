@@ -19,9 +19,6 @@ git clone https://github.com/FlynnYGUO/DUNE_PRISM_GEC_ND.git
 # This allows using pip
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh 
 setup dunetpc v09_41_00_02 -q e20:prof
-pip install --target=/exp/dune/app/users/$USER/lib/python3.9/site-packages uproot
-pip install --target=/exp/dune/app/users/$USER/lib/python3.9/site-packages torch
-pip install --target=/exp/dune/app/users/$USER/lib/python3.9/site-packages scipy
 ```
 Next time once you log in to the FNAL machine, do the following (do it every time you log in):
 ```
