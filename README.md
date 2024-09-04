@@ -22,10 +22,10 @@ setup dunetpc v09_41_00_02 -q e20:prof
 ```
 Next time once you log in to the FNAL machine, do the following (do it every time you log in):
 ```
-cd /exp/dune/app/users/$USERS
+cd /exp/dune/app/users/$USER
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh 
 setup dunetpc v09_41_00_02 -q e20:prof
-export PYTHONPATH=/exp/dune/app/users/flynnguo/lib/python3.9/site-packages:$PYTHONPATH
+export PYTHONPATH=/exp/dune/app/users/$USER/lib/python3.9/site-packages:$PYTHONPATH
 ```
 You can also source the new version of ROOT:
 ```
