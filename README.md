@@ -12,7 +12,7 @@ kfnal                                      # Short for kinit -f <username>@FNAL.
 ssh -X janelly@dunegpvm01.fnal.gov
 exit                                       # Quit FNAL
 ```
-or, to directly access the DUNE FNAL machine through the vnc server, use
+or to directly access the DUNE FNAL machine through the vnc server, use
 ```
 ssh -Y -L 5901:localhost:5901 janelly@dunegpvm01.fnal.gov
 ```
