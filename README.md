@@ -8,8 +8,8 @@ DUNE-PRISM: GEC from muon side
 ### 0. Setup
 #### 1. Log in & DUNE FNAL machines (dunegpvm*) environment setup:
 ```
-kfnal                                      # Short for kinit -f <username>@FNAL.GOV. In my laptop, alias kfnal="/usr/bin/kinit flynnguo@FNAL.GOV" in ~/.zshrc
-ssh -X janelly@dunegpvm01.fnal.gov
+kfnal                                      # Short for kinit -f <username>@FNAL.GOV. 
+ssh -X janelly@dunegpvm01.fnal.gov      
 exit                                       # Quit FNAL
 ```
 or to directly access the DUNE FNAL machine through the vnc server, use
